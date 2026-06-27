@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Kalka digital</title>
+    <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <style>
+    main {
+      padding-top: calc(var(--nav-height) + 24px);
+    }
+
+    /* HEADER */
+    .gallery-header {
+      padding: 3.2rem var(--px) 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    @media (min-width: 768px) {
+      .gallery-header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+    }
+
+    .gallery-header h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .gallery-header h1 em {
+      color: var(--primary-fixed);
+    }
+
+    .gallery-header p {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      line-height: 1.75;
+      max-width: 320px;
+    }
+
+    /* FILTER TABS */
+    .filter-bar {
+      padding: 0 var(--px) 1.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-tab {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      cursor: none;
+      border: none;
+      background: transparent;
+      color: var(--on-surface-variant);
+      transition: background 0.3s, color 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .filter-tab.active,
+    .filter-tab:hover {
+      background: var(--surface-container);
+      color: #000;
+    }
+
+    .filter-tab.active {
+      font-weight: 600;
+    }
+
+    /* MASONRY */
+    .masonry-wrap {
+      padding: 2rem var(--px) 3.2rem;
+      column-count: 3;
+      column-gap: 1.2rem;
+    }
+
+    @media (max-width: 900px) {
+      .masonry-wrap {
+        column-count: 2;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .masonry-wrap {
+        column-count: 1;
+      }
+    }
+
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 1.2rem;
+      cursor: none;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .masonry-img {
+      overflow: hidden;
+      border-radius: 9px;
+      background: var(--surface-container);
+      margin-bottom: 0.6rem;
+      position: relative;
+    }
+
+    .masonry-img img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: grayscale(0.12) brightness(0.92);
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s, opacity 0.5s;
+      opacity: 0.92;
+    }
+
+    .masonry-item:hover .masonry-img img {
+      transform: scale(1.05);
+      filter: grayscale(0) brightness(1);
+      opacity: 1;
+    }
+
+    .masonry-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0);
+      transition: background 0.5s;
+      border-radius: 9px;
+    }
+
+    .masonry-item:hover .masonry-overlay {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .masonry-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0 0.2rem;
+    }
+
+    .masonry-meta h3 {
+      font-size: 1rem;
+      font-style: italic;
+      letter-spacing: -0.02em;
+    }
+
+    .masonry-meta span {
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* LOAD MORE */
+    .load-more-wrap {
+      padding: 1.6rem var(--px) 3.2rem;
+    }
+
+    .btn-load-more {
+      width: 100%;
+      padding: 1.4rem;
+      border: none;
+      border-top: 1px solid var(--outline-variant);
+      border-bottom: 1px solid var(--outline-variant);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      cursor: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      transition: background 0.4s;
+      border-radius: 8px;
+    }
+
+    .btn-load-more:hover {
+      background: var(--surface-container-low);
+    }
+
+    .btn-load-more .material-symbols-outlined {
+      font-size: 0.9rem !important;
+      transition: transform 0.3s;
+    }
+
+    .btn-load-more:hover .material-symbols-outlined {
+      transform: translateX(5px);
+    }
+
+    /* LIGHTBOX */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lightbox-img {
+      max-width: 80vw;
+      max-height: 80vh;
+      border-radius: 8px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+      transform: scale(0.93);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .lightbox.open .lightbox-img {
+      transform: scale(1);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #fff;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: none;
+      font-size: 1.2rem;
+      transition: background 0.3s;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-caption {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Kalka digital</a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="gallery.html" class="active">Gallery</a>
+      <a href="wedding-gallery.html">Wedding</a>
+      <a href="family-functions.html">Family</a>
+      <a href="haldi-mehndi.html">Haldi/Mehndi</a>
+      <a href="video-gallery.html">Films</a>      
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="navbar-controls">
+      <a href="contact.html" class="btn-book">Book a Session</a>
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined icon-sun">light_mode</span>
+        <span class="material-symbols-outlined icon-moon">dark_mode</span>
+      </button>
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="menu-toggle-box">
+          <span class="menu-toggle-inner"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-links">
+        <a href="index.html" class="mobile-link">Home</a>
+        <a href="gallery.html" class="mobile-link active">Gallery</a>
+        <a href="wedding-gallery.html" class="mobile-link">Wedding</a>
+        <a href="family-functions.html" class="mobile-link">Family</a>
+        <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
+        <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="about.html" class="mobile-link">About</a>
+        <a href="contact.html" class="mobile-link">Contact</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="contact.html" class="btn-book-mobile">Book a Session</a>
+        <button class="mobile-theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined icon-sun">light_mode</span>
+          <span class="material-symbols-outlined icon-moon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <header class="gallery-header">
+      <div class="reveal">
+        <h1>Curated <em>Perspectives</em></h1>
+      </div>
+      <div class="reveal reveal-delay-1">
+        <p>A deliberate archive of moments where light and form meet intention. Each frame is a considered statement.
+        </p>
+        <div class="filter-bar" style="padding:1.2rem 0 0; border:none;">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="portraits">Portraits</button>
+          <button class="filter-tab" data-filter="landscapes">Landscapes</button>
+          <button class="filter-tab" data-filter="street">Street</button>
+          <button class="filter-tab" data-filter="fashion">Fashion</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="masonry-wrap" id="gallery-grid">
+      <a class="masonry-item reveal" data-category="portraits" href="#" data-title="The Quiet Gaze · Portraits / 01">
+        <div class="masonry-img">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953301/1_qcwtuy.jpg" alt="The Quiet Gaze" />
+          <div class="masonry-overlay"></div>
+        </div>
+        <div class="masonry-meta">
+          <h3>Silent Benediction</h3><span>Portraits / 01</span>
+        </div>
+      </a>
+      <a class="masonry-item reveal reveal-delay-1" data-category="landscapes" href="#"
+        data-title="Gathered Echoes · Landscapes / 02">
+        <div class="masonry-img">
+          <img
+            src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953301/2_zpfc0n.jpg"
+            alt="Gathered Echoes" />
+          <div class="masonry-overlay"></div>
+        </div>
+        <div class="masonry-meta">
+          <h3>Gathered Echoes</h3><span>Landscapes / 02</span>
+        </div>
+      </a>
+      <a class="masonry-item reveal reveal-delay-2" data-category="street" href="#"
+        data-title="The Reflection · Street / 03">
+        <div class="masonry-img">
+          <img
+            src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953300/3_hvixoa.jpg"
+            alt="The Reflection" />
+          <div class="masonry-overlay"></div>
+        </div>
+        <div class="masonry-meta">
+          <h3>The Reflection</h3><span>Street / 03</span>
+        </div>
+      </a>
+      <a class="masonry-item reveal" data-category="fashion" href="#" data-title="Architectural Form · Fashion / 04">
+        <div class="masonry-img">
+          <img
+            src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953298/4_ozq54v.jpg"
+            alt="Architectural Form" />
+          <div class="masonry-overlay"></div>
+        </div>
+        <div class="masonry-meta">
+          <h3>Architectural Form</h3><span>Fashion / 04</span>
+        </div>
+      </a>
+      <a class="masonry-item reveal reveal-delay-1" data-category="landscapes" href="#"
+        data-title="Filtered Light · Landscapes / 05">
+        <div class="masonry-img">
+          <img
+            src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953299/5_fhtcup.jpg"
+            alt="Filtered Light" />
+          <div class="masonry-overlay"></div>
+        </div>
+        <div class="masonry-meta">
+          <h3>Filtered Light</h3><span>Landscapes / 05</span>
+        </div>
+      </a>
+      <a class="masonry-item reveal reveal-delay-2" data-category="street" href="#"
+        data-title="Steel & Sky · Street / 06">
+        <div class="masonry-img">
+          <img
+            src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953302/6_mhqwri.jpg"
+            alt="Steel & Sky" />
+          <div class="masonry-overlay"></div>
+        </div>
+        <div class="masonry-meta">
+          <h3>Crimson Turbon</h3><span>Street / 06</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="load-more-wrap">
+      <button class="btn-load-more" 
+       onclick="window.open('https://kalkadigitalphotostudio.pixieset.com/kalkastudioportfolio/', '_blank')">
+       <span>Explore More Works</span>
+       <span class="material-symbols-outlined">arrow_forward</span>
+     </button>
+    </div>
+  </main>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lb-close"><span class="material-symbols-outlined"
+        style="font-size:1.1rem">close</span></button>
+    <img class="lightbox-img" id="lb-img" src="" alt="" />
+    <div class="lightbox-caption" id="lb-caption"></div>
+  </div>
+
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">Kalka digital</div>
+      <p>Capturing the essence of moments through deliberate frames and curated light.</p>
+      <p style="margin-top:0.8rem;">© 2026 Kalka digital. All Rights Reserved.</p>
+    </div>
+    <div>
+      <span class="footer-heading">Social</span>
+      <a href="https://www.instagram.com/kalka.studio1999/" target="_blank">Instagram</a> <a
+        href="https://www.youtube.com/@KalkaStudio" target="_blank">Youtube</a><a
+        href="https://www.justdial.com/Delhi/Kalka-Digital-Photo-Studio-Khanpur/011PXX11-XX11-141117175737-Z3Q6_BZDET?auto=1&trkid=2305672264&term=kalka%20studio%20khanpur"
+        target="_blank">Just Dial</a><a href="https://maps.app.goo.gl/UT1yKP69UiYti4FJ9" target="_blank">Google Maps</a>
+
+    </div>
+    <div>
+      <span class="footer-heading">Information</span>
+      <a href="#">Journal</a>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    // Filter
+    const tabs = document.querySelectorAll('.filter-tab');
+    const items = document.querySelectorAll('.masonry-item');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.dataset.filter;
+        items.forEach(item => {
+          const match = filter === 'all' || item.dataset.category === filter;
+          item.style.opacity = match ? '1' : '0.25';
+          item.style.pointerEvents = match ? 'auto' : 'none';
+          item.style.transition = 'opacity 0.4s';
+        });
+      });
+    });
+
+    // Lightbox
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lb-img');
+    const lbCaption = document.getElementById('lb-caption');
+    const lbClose = document.getElementById('lb-close');
+
+    items.forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        lbImg.src = item.querySelector('img').src;
+        lbCaption.textContent = item.dataset.title || '';
+        lb.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      });
+    });
+    lbClose.addEventListener('click', () => {
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    lb.addEventListener('click', e => {
+      if (e.target === lb) { lb.classList.remove('open'); document.body.style.overflow = ''; }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { lb.classList.remove('open'); document.body.style.overflow = ''; }
+    });
+  </script>
+</body>
+
+</html>

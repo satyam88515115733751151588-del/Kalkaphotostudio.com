@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Kalka digital</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <style>
+    main {
+      padding-top: calc(var(--nav-height) + 24px);
+    }
+
+    /* HERO */
+    .contact-hero {
+      padding: 3.2rem var(--px) 2rem;
+    }
+
+    .contact-hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+      max-width: 700px;
+    }
+
+    .contact-hero h1 em {
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* MAIN GRID */
+    .contact-grid {
+      padding: 2rem var(--px) 4rem;
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+    }
+
+    /* FORM */
+    .form-intro {
+      font-size: 0.78rem;
+      color: var(--on-surface-variant);
+      line-height: 1.75;
+      max-width: 480px;
+      margin-bottom: 2rem;
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.6rem;
+    }
+
+    @media (max-width: 540px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.52rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--surface-container-low);
+      border: none;
+      outline: none;
+      border-radius: 10px;
+      padding: 0.9rem 1.2rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--on-surface);
+      transition: background 0.3s, box-shadow 0.3s;
+      width: 100%;
+      resize: none;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: var(--surface-dim);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      background: var(--surface-container-high);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-group textarea {
+      min-height: 110px;
+    }
+
+    .btn-send {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 1rem 2.2rem;
+      border-radius: 9999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: none;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      transition: background 0.4s;
+      width: fit-content;
+      margin-top: 0.4rem;
+    }
+
+    .btn-send:hover {
+      background: var(--primary-fixed);
+    }
+
+    .btn-send .material-symbols-outlined {
+      font-size: 0.9rem !important;
+      transition: transform 0.3s;
+    }
+
+    .btn-send:hover .material-symbols-outlined {
+      transform: translateX(4px);
+    }
+
+    /* SUCCESS MESSAGE */
+    .form-success {
+      display: none;
+      background: var(--surface-container-low);
+      border-radius: 10px;
+      padding: 1.6rem;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .form-success.visible {
+      display: block;
+      animation: fadeSlideIn 0.5s ease both;
+    }
+
+    .form-success p {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      margin-top: 0.4rem;
+    }
+
+    .form-success h4 {
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    /* INFO PANEL */
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+
+    .studio-img {
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      border-radius: 12px;
+      background: var(--surface-container);
+    }
+
+    .studio-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) brightness(0.92);
+      transition: transform 2s ease, filter 0.5s;
+    }
+
+    .studio-img:hover img {
+      transform: scale(1.04);
+      filter: grayscale(0.3) brightness(1);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.6rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .info-block .info-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-bottom: 0.5rem;
+      display: block;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .info-block p {
+      font-size: 0.85rem;
+      font-family: 'Noto Serif', serif;
+      font-style: italic;
+      line-height: 1.55;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.6rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+    }
+
+    .social-link {
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: inherit;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+      font-family: 'Inter', sans-serif;
+      padding-bottom: 2px;
+      cursor: none;
+    }
+
+    .social-link:hover {
+      border-color: #000;
+    }
+
+    /* MAP PLACEHOLDER */
+    .map-placeholder {
+      width: 100%;
+      height: 130px;
+      background: var(--surface-container);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .map-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1);
+      opacity: 0.6;
+      transition: opacity 0.5s;
+    }
+
+    .map-placeholder:hover img {
+      opacity: 1;
+    }
+
+    /* MARQUEE */
+    .marquee-section {
+      padding: 2rem 0;
+      overflow: hidden;
+    }
+
+    .marquee-inner {
+      display: flex;
+      gap: 0;
+      white-space: nowrap;
+      animation: marquee 18s linear infinite;
+    }
+
+    .marquee-inner span {
+      font-family: 'Noto Serif', serif;
+      font-style: italic;
+      font-size: 7vw;
+      opacity: 0.05;
+      line-height: 1;
+      padding: 0 2rem;
+      flex-shrink: 0;
+    }
+
+    @keyframes marquee {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Kalka digital</a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="wedding-gallery.html">Wedding</a>
+      <a href="family-functions.html">Family</a>
+      <a href="haldi-mehndi.html">Haldi/Mehndi</a>
+      <a href="video-gallery.html">Films</a>
+      <a href="about.html" >About</a>
+      <a href="contact.html" class="active">Contact</a>
+    </div>
+    <div class="navbar-controls">
+      <a href="contact.html" class="btn-book">Book a Session</a>
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined icon-sun">light_mode</span>
+        <span class="material-symbols-outlined icon-moon">dark_mode</span>
+      </button>
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="menu-toggle-box">
+          <span class="menu-toggle-inner"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-links">
+        <a href="index.html" class="mobile-link">Home</a>
+        <a href="gallery.html" class="mobile-link">Gallery</a>
+        <a href="wedding-gallery.html" class="mobile-link">Wedding</a>
+        <a href="family-functions.html" class="mobile-link">Family</a>
+        <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
+        <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="about.html" class="mobile-link">About</a>
+        <a href="contact.html" class="mobile-link active">Contact</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="contact.html" class="btn-book-mobile">Book a Session</a>
+        <button class="mobile-theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined icon-sun">light_mode</span>
+          <span class="material-symbols-outlined icon-moon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="contact-hero">
+      <h1 class="reveal">Let's curate your <br /><em>visual legacy.</em></h1>
+    </section>
+
+    <!-- FORM + INFO -->
+    <section class="contact-grid">
+      <!-- LEFT: FORM -->
+      <div>
+        <p class="form-intro reveal">Whether you are looking to commission a series or discuss a potential
+          collaboration, our doors (and inbox) are always open for visionary projects.</p>
+
+        <form class="contact-form" id="contact-form" action="https://api.web3forms.com/submit" method="POST" novalidate>
+          <input type="hidden" name="access_key" value="251a702f-ff38-443a-b632-e2f096d9e350">
+
+          <div class="form-row">
+            <div class="form-group reveal reveal-delay-1">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" placeholder="E.g. Julianne Moore" required />
+            </div>
+
+            <div class="form-group reveal reveal-delay-2">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" placeholder="hello@studio.com" required />
+            </div>
+          </div>
+
+          <div class="form-group reveal reveal-delay-3">
+            <label for="subject">Subject</label>
+            <input type="text" id="subject" name="subject" placeholder="Inquiry regarding editorial series" />
+          </div>
+
+          <div class="form-group reveal reveal-delay-4">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" placeholder="Tell us about your project..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-send reveal">
+            Send Message
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </form>
+
+        <div class="form-success" id="form-success" style="display:none;">
+          <h4>Message Received</h4>
+          <p>We'll be in touch within 48 hours. In the meantime, explore our <a href="gallery.html"
+              style="border-bottom:1px solid currentColor;color:inherit;text-decoration:none;">gallery</a>.</p>
+        </div>
+      </div>
+      <script>
+        const form = document.getElementById("contact-form");
+        const successMessage = document.getElementById("form-success");
+
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(form);
+
+          const response = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            form.style.display = "none";
+            successMessage.style.display = "block";
+          } else {
+            alert("Something went wrong. Please try again.");
+          }
+        });
+      </script>
+
+      <!-- RIGHT: INFO -->
+      <div class="contact-info reveal reveal-delay-2">
+        <div class="studio-img">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953296/shop_1_bvbcuh.png" alt="Studio Interior" />
+        </div>
+        <div class="info-grid">
+          <div class="info-block">
+            <span class="info-label">Location</span>
+            <p>Shop No. D24A, Devli Rd, Khanpur Extension,<br />Khanpur, New Delhi, Delhi 110062</p>
+          </div>
+          <div class="info-block">
+            <span class="info-label">Inquiries</span>
+            <p>kalkastdd@gmail.com<br />+91 9717029642 <br>+91 9999980621</p>
+          </div>
+        </div>
+        <div>
+          <span class="info-label"
+            style="font-size:0.52rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:0.6rem;display:block;font-family:'Inter',sans-serif;">Follow
+            the Narrative</span>
+          <div class="social-links">
+            <a href="https://www.instagram.com/kalka.studio1999/" target="_blank" class="social-link">Instagram</a>
+            <a href="https://www.youtube.com/@KalkaStudio" target="_blank" class="social-link">Youtube</a>
+            <a href="https://maps.app.goo.gl/UT1yKP69UiYti4FJ9" target="_blank" class="social-link">Google Maps</a>
+          </div>
+        </div>
+        <div class="map-placeholder">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3505.9632661174087!2d77.2326935!3d28.5107529!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce198923d7e0f%3A0x4d538a1f33665c53!2sKalka%20Digital%20Studio!5e0!3m2!1sen!2sin!4v1775366223259!5m2!1sen!2sin"
+            width="500" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <section class="marquee-section">
+      <div class="marquee-inner">
+        <span>Excellence</span>
+        <span>Simplicity</span>
+        <span>Perspective</span>
+        <span>Excellence</span>
+        <span>Simplicity</span>
+        <span>Perspective</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">Kalka digital</div>
+      <p>A sanctuary for high-end photography and visual storytelling. Curated for the discerning eye.</p>
+      <p style="margin-top:0.6rem;">© 2026 Kalka digital. All Rights Reserved.</p>
+    </div>
+    <div>
+      <span class="footer-heading">Connections</span>
+      <a href="https://www.instagram.com/kalka.studio1999/" target="_blank">Instagram</a><a
+        href="https://www.youtube.com/@KalkaStudio" target="_blank">Youtube</a>
+      <span class="footer-heading" style="margin-top:0.8rem;">Insights</span>
+      <a href="https://www.justdial.com/Delhi/Kalka-Digital-Photo-Studio-Khanpur/011PXX11-XX11-141117175737-Z3Q6_BZDET?auto=1&trkid=2305672264&term=kalka%20studio%20khanpur"
+        target="_blank">justdial</a>
+    </div>
+    <div>
+      <span class="footer-heading">Newsletter</span>
+      <div class="footer-newsletter" style="margin-top:0.4rem;">
+        <input type="email" placeholder="EMAIL ADDRESS" />
+        <button class="material-symbols-outlined">trending_flat</button>
+      </div>
+      <p style="margin-top:1.6rem;">© 2026 Kalka digital.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    // Form submission
+    document.getElementById('contact-form').addEventListener('submit', e => {
+      e.preventDefault();
+      document.getElementById('contact-form').style.display = 'none';
+      document.getElementById('form-success').classList.add('visible');
+    });
+  </script>
+</body>
+
+</html>

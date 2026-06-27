@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home — Kalka digital</title>
+    <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ---- HERO SLIDER ---- */
+    .hero-section {
+      position: relative;
+      height: 90vh;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      padding: 0.8rem;
+      margin-top: calc(var(--nav-height) + 24px);
+    }
+
+    .slider-container {
+      position: absolute;
+      inset: 0.8rem;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+      border-radius: 14px;
+      gap: 0;
+    }
+
+    .slider-container:active {
+      cursor: grabbing;
+    }
+
+    .slider-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .slide {
+      scroll-snap-align: start;
+      flex-shrink: 0;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 8s ease;
+    }
+
+    .slide.active img {
+      transform: scale(1.04);
+    }
+
+    .slide-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.22);
+      border-radius: 14px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      color: #fff;
+      pointer-events: none;
+    }
+
+    .hero-content h1 {
+      font-size: clamp(2.4rem, 7vw, 5.6rem);
+      font-family: 'Noto Serif', serif;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      text-shadow: 0 2px 32px rgba(0, 0, 0, 0.3);
+      animation: heroTitle 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+    }
+
+    .hero-content p {
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.85;
+      margin-top: 1rem;
+      animation: heroTitle 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+    }
+
+    @keyframes heroTitle {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Slider Controls */
+    .slider-controls {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .slider-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s, border-color 0.3s;
+      font-size: 1rem;
+    }
+
+    .slider-btn:hover {
+      background: rgba(255, 255, 255, 0.35);
+      border-color: #fff;
+    }
+
+    .slide-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .dot.active {
+      background: #fff;
+      transform: scale(1.3);
+    }
+
+    /* ---- FEATURED WORKS ---- */
+    .featured-works {
+      padding: 4rem var(--px);
+      background: var(--surface);
+    }
+
+    .featured-works .section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--outline);
+      margin-bottom: 1.2rem;
+    }
+
+    .featured-works h2 {
+      font-size: 2.8rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 2.4rem;
+    }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.4rem;
+    }
+
+    @media (max-width: 768px) {
+      .works-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .work-card {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .work-card-img {
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 10px;
+      background: var(--surface-container);
+      margin-bottom: 0.7rem;
+    }
+
+    .work-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.15) brightness(0.93);
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s;
+    }
+
+    .work-card:hover .work-card-img img {
+      transform: scale(1.05);
+      filter: grayscale(0) brightness(1);
+    }
+
+    .work-card h3 {
+      font-size: 1.1rem;
+      font-style: italic;
+      letter-spacing: -0.02em;
+    }
+
+    .work-card .work-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-top: 0.2rem;
+    }
+
+    /* ---- ABOUT SECTION ---- */
+    .about-section {
+      background: var(--surface-container-low);
+      padding: 4.8rem var(--px);
+    }
+
+    .about-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .about-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .about-img-wrap {
+      position: relative;
+    }
+
+    .about-img-bg {
+      position: absolute;
+      top: -1.5rem;
+      left: -1.5rem;
+      width: 65%;
+      height: 65%;
+      background: var(--surface-container-high);
+      z-index: 0;
+      border-radius: 10px;
+    }
+
+    .about-img-wrap img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      border-radius: 10px;
+      filter: grayscale(0.2) brightness(0.92);
+      transition: filter 0.5s;
+    }
+
+    .about-img-wrap:hover img {
+      filter: grayscale(0) brightness(1);
+    }
+
+    .about-text .section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--outline);
+      margin-bottom: 0.9rem;
+    }
+
+    .about-text h2 {
+      font-size: 2.4rem;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+
+    .about-text p {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--on-surface-variant);
+      margin-bottom: 1.2rem;
+    }
+
+    .btn-text-link {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--primary);
+      padding-bottom: 2px;
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.3s;
+    }
+
+    .btn-text-link:hover {
+      opacity: 0.5;
+    }
+
+    /* ---- SERVICES ---- */
+    .services-section {
+      padding: 4rem var(--px);
+      background: var(--surface);
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 2.4rem;
+    }
+
+    @media (max-width: 768px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .service-item {
+      border-top: 1px solid var(--outline-variant);
+      padding-top: 1rem;
+    }
+
+    .service-num {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      color: var(--outline);
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .service-item h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.02em;
+    }
+
+    .service-item p {
+      font-size: 0.75rem;
+      line-height: 1.75;
+      color: var(--on-surface-variant);
+    }
+
+    /* ---- JOURNAL ---- */
+    .journal-section {
+      padding: 4rem var(--px);
+      background: #fff;
+    }
+
+    .journal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 2rem;
+    }
+
+    .journal-header h2 {
+      font-size: 2rem;
+      font-style: italic;
+      letter-spacing: -0.03em;
+    }
+
+    .journal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 768px) {
+      .journal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .journal-card {
+      background: var(--surface-container-low);
+      padding: 2rem;
+      border-radius: 10px;
+      transition: background 0.4s;
+    }
+
+    .journal-card:hover {
+      background: var(--surface-container-high);
+    }
+
+    .journal-date {
+      font-size: 0.55rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--outline);
+      margin-bottom: 0.5rem;
+    }
+
+    .journal-card h3 {
+      font-size: 1.4rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.7rem;
+      line-height: 1.2;
+    }
+
+    .journal-card p {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      line-height: 1.7;
+      margin-bottom: 1.2rem;
+    }
+
+    .journal-arrow {
+      font-size: 1.4rem !important;
+      font-weight: 100 !important;
+      font-variation-settings: 'FILL' 0, 'wght' 100, 'GRAD' 0, 'opsz' 24 !important;
+      transition: transform 0.3s;
+    }
+
+    .journal-card:hover .journal-arrow {
+      transform: translateX(6px);
+    }
+
+    .journal-grid {
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .journal-track {
+      display: flex;
+      gap: 20px;
+      width: max-content;
+      animation: scrollLeft 25s linear infinite;
+    }
+
+    .journal-card {
+      min-width: 280px;
+      /* controls card size */
+      flex-shrink: 0;
+    }
+
+    /* Animation */
+    @keyframes scrollLeft {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .journal-track:hover {
+      animation-play-state: paused;
+    }
+
+    .journal-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Kalka digital</a>
+    <div class="navbar-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="wedding-gallery.html">Wedding</a>
+      <a href="family-functions.html">Family</a>
+      <a href="haldi-mehndi.html">Haldi/Mehndi</a>
+      <a href="video-gallery.html">Films</a>
+      <a href="about.html" >About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="navbar-controls">
+      <a href="contact.html" class="btn-book">Book a Session</a>
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined icon-sun">light_mode</span>
+        <span class="material-symbols-outlined icon-moon">dark_mode</span>
+      </button>
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="menu-toggle-box">
+          <span class="menu-toggle-inner"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-links">
+        <a href="index.html" class="mobile-link active">Home</a>
+        <a href="gallery.html" class="mobile-link">Gallery</a>
+        <a href="wedding-gallery.html" class="mobile-link">Wedding</a>
+        <a href="family-functions.html" class="mobile-link">Family</a>
+        <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
+        <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="about.html" class="mobile-link">About</a>
+        <a href="contact.html" class="mobile-link">Contact</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="contact.html" class="btn-book-mobile">Book a Session</a>
+        <button class="mobile-theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined icon-sun">light_mode</span>
+          <span class="material-symbols-outlined icon-moon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO SLIDER -->
+    <section class="hero-section">
+      <div class="slider-container" id="hero-slider">
+        <div class="slide active">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953305/2_zn2zai.png" alt="Stunning Landscape" />
+          <div class="slide-overlay"></div>
+        </div>
+        <div class="slide">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953305/1_inn4rv.png" alt="Misty Forest" />
+          <div class="slide-overlay"></div>
+        </div>
+        <div class="slide">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953305/3_zregut.png" alt="Serene Ocean" />
+          <div class="slide-overlay"></div>
+        </div>
+      </div>
+      <div class="hero-content">
+        <h1>Kalka<br /><em>Digital</em></h1>
+        <p>Light. Silence. Perspective.</p>
+      </div>
+      <div class="slider-controls">
+        <button class="slider-btn" id="prev-slide"><span class="material-symbols-outlined"
+            style="font-size:16px">arrow_back</span></button>
+        <div class="slide-dots" id="slide-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <button class="slider-btn" id="next-slide"><span class="material-symbols-outlined"
+            style="font-size:16px">arrow_forward</span></button>
+      </div>
+    </section>
+
+    <!-- FEATURED WORKS -->
+    <section class="featured-works">
+      <div class="reveal"><span class="section-label">Selected Works</span></div>
+      <div class="reveal reveal-delay-1">
+        <h2>Curated <em>Perspectives</em></h2>
+      </div>
+      <div class="works-grid">
+        <a href="gallery.html" class="work-card reveal reveal-delay-1">
+          <div class="work-card-img">
+            <img
+              src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953296/1_wo4mvy.png"
+              alt="The Quiet Gaze" />
+          </div>
+          <h3>The Quiet Gaze</h3>
+          <p class="work-label">Portraits / 01</p>
+        </a>
+        <a href="gallery.html" class="work-card reveal reveal-delay-2">
+          <div class="work-card-img">
+            <img
+              src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953296/2_f4bisf.png"
+              alt="Eternal Mist" />
+          </div>
+          <h3>Eternal Mist</h3>
+          <p class="work-label">Portrait / 02</p>
+        </a>
+        <a href="gallery.html" class="work-card reveal reveal-delay-3">
+          <div class="work-card-img">
+            <img
+              src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953298/3_nasve4.png"
+              alt="Bridal Radiance" />
+          </div>
+          <h3>Bridal Radiance</h3>
+          <p class="work-label">Portraits / 03</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section class="about-section">
+      <div class="about-inner">
+        <div class="about-img-wrap reveal">
+          <div class="about-img-bg"></div>
+          <img
+            src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953305/quote_rqw38g.jpg"
+            alt="The Vision" />
+        </div>
+        <div class="about-text">
+          <span class="section-label reveal">The Vision</span>
+          <h2 class="reveal reveal-delay-1">We believe in the power of the unspoken.</h2>
+          <p class="reveal reveal-delay-2">Kalka digital is more than a studio. It is a space where light, texture, and
+            emotion converge to tell stories that bypass the noise of the digital age.</p>
+          <a href="about.html" class="btn-text-link reveal reveal-delay-3">Read our philosophy</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="services-section">
+      <div class="reveal"><span class="section-label"
+          style="font-size:0.6rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--outline);display:block;margin-bottom:0.4rem;">What
+          we do</span></div>
+      <div class="services-grid">
+        <a href="packages.html" class="service-item reveal reveal-delay-1" style="text-decoration:none;color:inherit;">
+          <span class="service-num">01</span>
+          <h3>Editorial Portraiture</h3>
+          <p>High-concept portrait sessions for brands, publications, and individuals seeking a refined aesthetic.</p>
+        </a>
+        <a href="packages.html" class="service-item reveal reveal-delay-2" style="text-decoration:none;color:inherit;">
+          <span class="service-num">02</span>
+          <h3>Event Photography</h3>
+          <p>captures moments that can never be recreated, preserving memories for a lifetime.
+            It helps document emotions, highlights, and the overall story of an event in a powerful visual way.</p>
+        </a>
+        <a href="packages.html" class="service-item reveal reveal-delay-3" style="text-decoration:none;color:inherit;">
+          <span class="service-num">03</span>
+          <h3>Product Photography</h3>
+          <p>The art of capturing high-quality images of products to showcase them in the best possible light.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- JOURNAL -->
+    <section class="journal-section">
+      <div class="journal-header reveal">
+        <h2>Our Gears</h2>
+        <a href="#" class="btn-text-link" style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;">View
+          All Entries</a>
+      </div>
+      <div class="journal-grid">
+        <div class="journal-track">
+
+          <!--7 cards (same as before) -->
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/canon_r6_lw8jnf.png" alt="canon r6"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/r6_mii_tjlehy.png" alt="Canon r6 mii"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/80d_w69ewo.png" alt="canon 80d"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/alpha_m3_zymhwu.png" alt="alpha m3"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/alpha_7_m4_ht7saa.png" alt="alpha 7 m4"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/if_oxrlmt.png"
+              alt="f we do not have a camera available, we would be happy to arrange one for you."> </div>
+
+          <!-- DUPLICATE cards  -->
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/canon_r6_lw8jnf.png" alt="canon r6"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/r6_mii_tjlehy.png" alt="Canon r6 mii"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/80d_w69ewo.png" alt="canon 80d"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/alpha_m3_zymhwu.png" alt="alpha m3"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/alpha_7_m4_ht7saa.png" alt="alpha 7 m4"> </div>
+          <div class="journal-card"> <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953304/if_oxrlmt.png"
+              alt="f we do not have a camera available, we would be happy to arrange one for you."> </div>
+
+        </div>
+      </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">Kalka digital</div>
+      <p>© 2026 Kalka digital. All Rights Reserved.</p>
+    </div>
+    <div>
+      <span class="footer-heading">Directory</span>
+      <a href="https://www.instagram.com/kalka.studio1999/" target="_blank">Instagram</a> <a
+        href="https://www.youtube.com/@KalkaStudio" target="_blank">Youtube</a><a
+        href="https://www.justdial.com/Delhi/Kalka-Digital-Photo-Studio-Khanpur/011PXX11-XX11-141117175737-Z3Q6_BZDET?auto=1&trkid=2305672264&term=kalka%20studio%20khanpur"
+        target="_blank">Just Dial</a><a href="https://maps.app.goo.gl/UT1yKP69UiYti4FJ9" target="_blank">Google Maps</a>
+    </div>
+    <div>
+      <span class="footer-heading">Contact</span>
+      <span>kalkastd@gmail.com</span>
+      <span style="margin-top:1rem;">Newsletter</span>
+      <div class="footer-newsletter">
+        <input type="email" placeholder="EMAIL ADDRESS" />
+        <button class="material-symbols-outlined">trending_flat</button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script>
+    {
+      // Slider logic — wrapped in block scope to avoid const conflicts with main.js
+      const slider = document.getElementById('hero-slider');
+      const prevBtn = document.getElementById('prev-slide');
+      const nextBtn = document.getElementById('next-slide');
+      const dots = document.querySelectorAll('.dot');
+      const slides = document.querySelectorAll('.slide');
+      let currentSlide = 0;
+
+      function goToSlide(n) {
+        currentSlide = (n + slides.length) % slides.length;
+        slider.scrollTo({ left: currentSlide * slider.clientWidth, behavior: 'smooth' });
+        dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+      }
+
+      prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+      nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+      dots.forEach((d, i) => d.addEventListener('click', () => goToSlide(i)));
+
+      // Auto-advance
+      setInterval(() => goToSlide(currentSlide + 1), 5000);
+
+      // Drag
+      let isDown = false, startX = 0, scrollLeft = 0;
+      slider.addEventListener('mousedown', e => {
+        isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft;
+      });
+      slider.addEventListener('mouseleave', () => isDown = false);
+      slider.addEventListener('mouseup', () => isDown = false);
+      slider.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        slider.scrollLeft = scrollLeft - (x - startX) * 1.5;
+      });
+    }
+  </script>
+</body>
+
+</html>

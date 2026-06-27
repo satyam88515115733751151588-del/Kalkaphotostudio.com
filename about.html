@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Kalka digital</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="aboutstyles.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <style>
+    main {
+      padding-top: calc(var(--nav-height) + 24px);
+    }
+
+    /* HERO */
+    .about-hero {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 3.2rem var(--px) 3.2rem;
+      display: grid;
+      grid-template-columns: 5fr 7fr;
+      gap: 1.5rem;
+      align-items: stretch;
+      min-height: 520px;
+    }
+
+    @media (max-width: 768px) {
+      .about-hero {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+    }
+
+    .about-hero-img {
+      overflow: hidden;
+      border-radius: 14px;
+      height: 100%;
+      min-height: 360px;
+    }
+
+    .about-hero-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) brightness(0.9);
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s;
+    }
+
+    .about-hero-img:hover img {
+      transform: scale(1.04);
+      filter: grayscale(0.4) brightness(1);
+    }
+
+    .about-hero-text {
+      background: var(--surface-container-low);
+      padding: 3.2rem;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .about-since {
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+      margin-bottom: 1rem;
+    }
+
+    .about-hero-text h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      letter-spacing: -0.05em;
+      line-height: 1;
+      margin-bottom: 2rem;
+    }
+
+    .about-hero-text p {
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--on-surface-variant);
+      max-width: 420px;
+      margin-bottom: 1rem;
+    }
+
+    /* VALUES */
+    .values-section {
+      background: var(--surface-container);
+      padding: 4rem var(--px);
+    }
+
+    .values-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 4fr 8fr;
+      gap: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .values-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .values-heading h2 {
+      font-size: 1.7rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.2rem;
+    }
+
+    .values-heading .divider {
+      width: 3rem;
+      height: 1px;
+      background: var(--outline-variant);
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.4rem;
+    }
+
+    @media (max-width: 540px) {
+      .values-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .value-item .value-icon {
+      font-size: 1.8rem !important;
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+
+    .value-item h3 {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    .value-item p {
+      font-size: 0.75rem;
+      line-height: 1.75;
+      color: var(--on-surface-variant);
+    }
+
+    /* AWARDS */
+    .awards-section {
+      background: var(--surface);
+      padding: 4rem var(--px);
+      overflow: hidden;
+    }
+
+    .awards-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 6fr 6fr;
+      gap: 3rem;
+    }
+
+    @media (max-width: 768px) {
+      .awards-inner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .awards-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-bottom: 2rem;
+    }
+
+    .awards-left h2 {
+      font-size: 2.8rem;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .awards-left p {
+      font-size: 0.75rem;
+      color: var(--on-surface-variant);
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .awards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .award-row {
+      background: var(--surface-container-lowest);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 9px;
+      transition: background 0.4s, color 0.4s;
+      cursor: default;
+    }
+
+    .award-row:hover {
+      background: #000;
+      color: #fff;
+    }
+
+    .award-row .award-year {
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 0.2rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .award-row h4 {
+      font-size: 0.95rem;
+      font-family: 'Noto Serif', serif;
+      letter-spacing: -0.01em;
+    }
+
+    .award-row .award-star {
+      font-size: 1rem !important;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .award-row:hover .award-star {
+      opacity: 1;
+    }
+
+    /* QUOTE CALLOUT */
+    .quote-callout {
+      max-width: 1280px;
+      margin: 0 auto 2.4rem;
+      padding: 0 var(--px);
+    }
+
+    .quote-inner {
+      height: 280px;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .quote-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.35;
+    }
+
+    .quote-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .quote-text {
+      position: relative;
+      z-index: 2;
+      padding: 1.6rem;
+    }
+
+    .quote-text h2 {
+      font-size: clamp(1.1rem, 3vw, 2rem);
+      color: #fff;
+      letter-spacing: -0.03em;
+      font-style: italic;
+      line-height: 1.35;
+      max-width: 640px;
+    }
+  </style>
+  <link rel="icon" href="favicon.ico">
+</head>
+
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Kalka digital</a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="wedding-gallery.html">Wedding</a>
+      <a href="family-functions.html">Family</a>
+      <a href="haldi-mehndi.html">Haldi/Mehndi</a>
+      <a href="video-gallery.html">Films</a>
+      <a href="about.html" class="active">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="navbar-controls">
+      <a href="contact.html" class="btn-book">Book a Session</a>
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined icon-sun">light_mode</span>
+        <span class="material-symbols-outlined icon-moon">dark_mode</span>
+      </button>
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="menu-toggle-box">
+          <span class="menu-toggle-inner"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-links">
+        <a href="index.html" class="mobile-link">Home</a>
+        <a href="gallery.html" class="mobile-link">Gallery</a>
+        <a href="wedding-gallery.html" class="mobile-link">Wedding</a>
+        <a href="family-functions.html" class="mobile-link">Family</a>
+        <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
+        <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="about.html" class="mobile-link active">About</a>
+        <a href="contact.html" class="mobile-link">Contact</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="contact.html" class="btn-book-mobile">Book a Session</a>
+        <button class="mobile-theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined icon-sun">light_mode</span>
+          <span class="material-symbols-outlined icon-moon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO -->
+    <section class="about-hero">
+      <div class="about-hero-img">
+        <div class="slide active">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953295/1_otrpku.jpg" alt="Lead Photographer portrait" />
+        </div>
+        <div class="slide">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953292/2_eujbra.jpg" alt="Architecture study" />
+        </div>
+        <div class="slide">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953291/3_oitmyk.jpg" alt="Editorial portrait" />
+        </div>
+        <div class="slide">
+          <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953290/4_rbl8fe.jpg" alt="Natural light study" />
+        </div>
+
+        <span class="slide-counter">01 / 04</span>
+
+        <div class="slide-dots">
+          <button class="dot active" data-index="0"></button>
+          <button class="dot" data-index="1"></button>
+          <button class="dot" data-index="2"></button>
+          <button class="dot" data-index="3"></button>
+        </div>
+      </div>
+      <div class="about-hero-text">
+        <span class="about-since reveal">Since 1999</span>
+        <h1 class="reveal reveal-delay-1">My Story</h1>
+        <p class="reveal reveal-delay-2">My story began in 1999, when I started Kalka Digital alongside . With just a small shop, a single computer, and an old Nikon camera,
+          the journey started with limited resources but a strong belief in hard work and dedication.</p>
+        <p class="reveal reveal-delay-3">Over the years, that humble beginning grew into a trusted business through
+          persistence, learning, and adapting to changing times. What started as a small setup has evolved into a
+          reflection of passion, commitment, and the vision to continuously grow and serve better.</p>
+      </div>
+    </section>
+
+    <!-- VALUES -->
+    <section class="values-section">
+      <div class="values-inner">
+        <div class="values-heading reveal">
+          <h2>Why We Capture</h2>
+          <div class="divider"></div>
+        </div>
+        <div class="values-grid">
+          <div class="value-item reveal reveal-delay-1">
+            <span class="material-symbols-outlined value-icon">lens_blur</span>
+            <h3>Intentionality</h3>
+            <p>Edited with intention, not excess. Whether it’s clean and natural or bold and stylized, every look is
+              crafted to feel real and hit different.</p>
+          </div>
+          <div class="value-item reveal reveal-delay-2">
+            <span class="material-symbols-outlined value-icon">flare</span>
+            <h3>Authenticity</h3>
+            <p>No excessive retouching. We celebrate the texture of skin, the grain of the film, and the honest
+              imperfection of a fleeting expression.</p>
+          </div>
+          <div class="value-item reveal reveal-delay-3">
+            <span class="material-symbols-outlined value-icon">architecture</span>
+            <h3>Structure</h3>
+            <p>nspired by minimal design, we treat every frame like it matters clean, balanced, and built to feel right.
+            </p>
+          </div>
+          <div class="value-item reveal reveal-delay-4">
+            <span class="material-symbols-outlined value-icon">history_edu</span>
+            <h3>Legacy</h3>
+            <p>Legacy? Best in the business for the last 27 years.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AWARDS -->
+    <section class="awards-section">
+      <div class="awards-inner">
+        <div class="awards-left reveal">
+          <h2>Trusted and &amp;<br />Recognised by...</h2>
+          <p>A decade of dedication to the craft, recognized by the industry's most prestigious institutions.</p>
+        </div>
+        <div class="awards-list">
+          <div class="award-row reveal reveal-delay-1">
+            <div>
+              <p class="award-year">Photography, Photo frames, event photography</p>
+              <h4>UIDAI (Unique Identification Authority of India)</h4>
+            </div>
+            <span class="material-symbols-outlined award-star">star</span>
+          </div>
+          <div class="award-row reveal reveal-delay-2">
+            <div>
+              <p class="award-year">Photo frames, event photography, video shoots, etc</p>
+              <h4>Income Tax Dept. (Delhi)</h4>
+            </div>
+            <span class="material-symbols-outlined award-star">star</span>
+          </div>
+          <div class="award-row reveal reveal-delay-3">
+            <div>
+              <p class="award-year">Event photography</p>
+              <h4>Rosur Pharmacy</h4>
+            </div>
+            <span class="material-symbols-outlined award-star">star</span>
+          </div>
+          <div class="award-row reveal reveal-delay-4">
+            <div>
+              <h4>And many more esteemed institutions</h4>
+            </div>
+            <span class="material-symbols-outlined award-star">star</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUOTE -->
+    <div class="quote-callout">
+      <div class="quote-inner reveal">
+        <div class="quote-bg">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_lPiCzXTzletzB7g9l3hUebE4s80Nu0kMdZB2GDVOYxlMtwbEcTUVMmuJaTZrlkhf3ZdWCEGqQDqYtgOk5Yf9qb101fv98e5rK69VktPwGigpGmbH0YKWy5XCm3sZ7-v_prUIlSykorF8gcwZIHKmRx_OZIquk7qy1ToQqXsiD77veOEJGgjx0x7EOrLubaRi8HjBwTy32AlAZvzbL6F1WHQ8MlY4o-No2C65aOstawUz8hy9uUFhqieE1pXj3i6y1l2Ej9tDTHU"
+            alt="Texture" />
+        </div>
+        <div class="quote-text">
+          <h2>"Price is what you pay. Value is what you get "</h2>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">Kalka digital</div>
+      <p>© 2026 Kalka digital. All Rights Reserved.</p>
+    </div>
+    <div>
+      <span class="footer-heading">Directory</span>
+      <a href="https://www.instagram.com/kalka.studio1999/" target="_blank">Instagram</a> <a
+        href="https://www.youtube.com/@KalkaStudio" target="_blank">Youtube</a><a
+        href="https://www.justdial.com/Delhi/Kalka-Digital-Photo-Studio-Khanpur/011PXX11-XX11-141117175737-Z3Q6_BZDET?auto=1&trkid=2305672264&term=kalka%20studio%20khanpur"
+        target="_blank">Just Dial</a><a href="https://maps.app.goo.gl/UT1yKP69UiYti4FJ9" target="_blank">Google Maps</a>
+    </div>
+    <div>
+      <span class="footer-heading">Contact</span>
+      <span>+91 9717029642</span>
+      <span>+91 9999980621</span>
+      <span>Kalkastd@gmail.com</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+
+</html>

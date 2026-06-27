@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Stories — Kalka digital</title>
+    <link rel="icon" href="favicon.ico">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    main {
+      padding-top: calc(var(--nav-height) + 24px);
+      background: var(--surface);
+    }
+
+    .hero {
+      padding: 4rem var(--px) 3rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+      align-items: end;
+    }
+
+    @media(max-width:768px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .hero h1 em {
+      color: var(--primary-fixed);
+      font-style: italic;
+    }
+
+    .hero p {
+      font-size: 0.8rem;
+      line-height: 1.9;
+      color: var(--on-surface-variant);
+      max-width: 420px;
+    }
+
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1rem;
+      padding: 0 var(--px) 4rem;
+    }
+
+    @media(max-width:768px) {
+      .story-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .story-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      min-height: 340px;
+    }
+
+    .story-card.large {
+      grid-column: span 7;
+    }
+
+    .story-card.medium {
+      grid-column: span 5;
+    }
+
+    .story-card.small {
+      grid-column: span 4;
+    }
+
+    .story-card.tall {
+      grid-column: span 8;
+      min-height: 540px;
+    }
+
+    @media(max-width:768px) {
+
+      .story-card.large,
+      .story-card.medium,
+      .story-card.small,
+      .story-card.tall {
+        grid-column: auto;
+      }
+    }
+
+    .story-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(0.15) brightness(0.9);
+      transition: transform 1s ease, filter 0.5s;
+    }
+
+    .story-card:hover img {
+      transform: scale(1.06);
+      filter: grayscale(0) brightness(1);
+    }
+
+    .story-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top,
+          rgba(0, 0, 0, 0.65),
+          rgba(0, 0, 0, 0.05));
+      display: flex;
+      align-items: flex-end;
+      padding: 2rem;
+    }
+
+    .story-meta span {
+      display: block;
+      font-size: 0.55rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.6rem;
+    }
+
+    .story-meta h2 {
+      color: #fff;
+      font-size: 2rem;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .quote-section {
+      padding: 5rem var(--px);
+      text-align: center;
+      background: var(--surface-container-low);
+    }
+
+    .quote-section p {
+      font-size: clamp(1.4rem, 4vw, 2.6rem);
+      max-width: 900px;
+      margin: auto;
+      line-height: 1.4;
+      letter-spacing: -0.03em;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Kalka digital</a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="wedding-gallery.html" class="active">Wedding</a>
+      <a href="family-functions.html">Family</a>
+      <a href="haldi-mehndi.html">Haldi/Mehndi</a>
+      <a href="video-gallery.html">Films</a>      
+      <a href="about.html">About</a>
+      <a href="contact.html" >Contact</a>
+    </div>
+    <div class="navbar-controls">
+      <a href="contact.html" class="btn-book">Book a Session</a>
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined icon-sun">light_mode</span>
+        <span class="material-symbols-outlined icon-moon">dark_mode</span>
+      </button>
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="menu-toggle-box">
+          <span class="menu-toggle-inner"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-links">
+        <a href="index.html" class="mobile-link">Home</a>
+        <a href="gallery.html" class="mobile-link">Gallery</a>
+        <a href="wedding-gallery.html" class="mobile-link active">Wedding</a>
+        <a href="family-functions.html" class="mobile-link">Family</a>
+        <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
+        <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="about.html" class="mobile-link">About</a>
+        <a href="contact.html" class="mobile-link">Contact</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="contact.html" class="btn-book-mobile">Book a Session</a>
+        <button class="mobile-theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined icon-sun">light_mode</span>
+          <span class="material-symbols-outlined icon-moon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <main>
+
+    <section class="hero">
+      <div>
+        <h1>Wedding <em>Stories</em></h1>
+      </div>
+
+      <div>
+        <p>
+          Cinematic wedding frames shaped through emotion, silence, movement and timeless light.
+          Every image becomes a lasting archive of presence.
+        </p>
+      </div>
+    </section>
+
+    <section class="story-grid">
+
+      <div class="story-card large">
+        <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/1_dmzrya.jpg" alt="">
+        <div class="story-overlay">
+          <div class="story-meta">
+            <span>Wedding / 01</span>
+            <h2>Quiet Vows</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-card medium">
+        <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/2_qlmx2v.jpg" alt="">
+        <div class="story-overlay">
+          <div class="story-meta">
+            <span>Wedding / 02</span>
+            <h2>Golden Moments</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-card small">
+        <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/3_h6jwkc.jpg" alt="hello">
+        <div class="story-overlay">
+          <div class="story-meta">
+            <span>Wedding / 03</span>
+            <h2>Stillness</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-card tall">
+        <img src="https://res.cloudinary.com/drppdpiyi/image/upload/v1779953303/4_ivfmoz.jpg" alt="">
+        <div class="story-overlay">
+          <div class="story-meta">
+            <span>Wedding / 04</span>
+            <h2>The Ceremony</h2>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="quote-section">
+      <p class="serif">
+        “A wedding is not documented through poses. It is preserved through atmosphere.”
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">Kalka digital</div>
+      <p>© 2026 Kalka digital. All Rights Reserved.</p>
+    </div>
+
+    <div>
+      <span class="footer-heading">Directory</span>
+      <a href="#">Instagram</a>
+      <a href="#">Youtube</a>
+      <a href="#">Google Maps</a>
+    </div>
+
+    <div>
+      <span class="footer-heading">Contact</span>
+      <span>kalkastd@gmail.com</span>
+    </div>
+  </footer>
+<script src="main.js"></script>
+</body>
+
+</html>
