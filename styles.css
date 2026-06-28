@@ -50,9 +50,9 @@
   --surface-tint: #a0a0a0;
   --surface-dim: #2a2a2a;
 
-  --island-bg: rgba(22, 22, 24, 0.78);
-  --island-border: rgba(255, 255, 255, 0.10);
-  --island-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 1.5px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  --island-bg: rgba(12, 14, 18, 0.72);
+  --island-border: rgba(120, 220, 180, 0.18);
+  --island-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 1.5px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(120,220,180,0.10);
 }
 
 [data-theme="dark"] .footer {
@@ -74,6 +74,27 @@
 [data-theme="dark"] .mobile-link.active { color: #e8e8e8; }
 [data-theme="dark"] .btn-book-mobile { background: #e8e8e8; color: #111; }
 [data-theme="dark"] .award-row:hover { background: #fff; color: #000; }
+
+/* Gallery: "Explore More Works" text fix in dark mode */
+[data-theme="dark"] .btn-load-more {
+  color: var(--on-surface);
+  border-color: var(--outline-variant);
+}
+
+/* Filter tabs: active text should not be hard-coded black */
+[data-theme="dark"] .filter-tab.active,
+[data-theme="dark"] .filter-tab:hover {
+  color: var(--on-surface);
+  background: var(--surface-container);
+}
+
+/* Journal / Gears section: dark mode background */
+[data-theme="dark"] .journal-section {
+  background: var(--surface-container-lowest) !important;
+}
+[data-theme="dark"] .journal-card {
+  background: var(--surface-container-low);
+}
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 80%; scroll-behavior: smooth; }
@@ -165,6 +186,27 @@ h1, h2, h3, .font-headline, .font-serif { font-family: 'Noto Serif', serif; }
     inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
+/* ---- AURORA CANVAS inside navbar ---- */
+.navbar-aurora {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 9999px;
+  pointer-events: none;
+  /* Keep out of flex flow */
+  flex: 0 0 0;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  mix-blend-mode: screen;
+}
+[data-theme="dark"] .navbar-aurora {
+  opacity: 1;
+}
+
 /* Liquid shimmer pseudo element */
 .navbar::before {
   content: '';
@@ -189,8 +231,8 @@ h1, h2, h3, .font-headline, .font-serif { font-family: 'Noto Serif', serif; }
   );
 }
 
-/* Everything inside sits above the shimmer */
-.navbar > * { position: relative; z-index: 1; }
+/* Everything inside sits above the shimmer, except the aurora canvas */
+.navbar > *:not(.navbar-aurora) { position: relative; z-index: 1; }
 
 .navbar-brand {
   font-family: 'Noto Serif', serif;
