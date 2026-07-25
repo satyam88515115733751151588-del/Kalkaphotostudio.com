@@ -1,0 +1,16 @@
+{
+  "name": "kalkaphotostudio-com",
+  "version": "1.0.0",
+  "description": "Kalka Digital Photography Studio Website",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site - no build needed'",
+    "lint": "echo 'No linting configured for static HTML'",
+    "test": "echo 'No tests configured'"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1"
+  },
+  "devDependencies": {}
+}
