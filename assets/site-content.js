@@ -39,7 +39,7 @@
       images.forEach((img) => {
         const caption = escapeHtml(img.alt);
         galleryGrid.insertAdjacentHTML('afterbegin', `
-          <a class="masonry-item reveal" data-category="all" href="#" data-title="${caption}">
+          <a class="masonry-item" data-category="all" href="#" data-title="${caption}">
             <div class="masonry-img">
               <img src="${img.url}" alt="${caption}" />
               <div class="masonry-overlay"></div>
