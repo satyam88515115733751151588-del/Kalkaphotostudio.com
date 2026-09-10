@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalka Album Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ===== Top bar ===== -->
+  <header class="topbar">
+    <div class="topbar__brand" data-nav="dashboard">
+      <span class="brand-mark">Kalka</span><span class="brand-mark brand-mark--light"> Album Builder</span>
+    </div>
+    <nav class="topbar__actions">
+      <button class="btn btn--ghost" id="btn-settings" type="button">Cloudinary settings</button>
+      <button class="btn btn--ghost" id="btn-theme" type="button" aria-label="Toggle theme">
+        <span class="theme-icon">◐</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ===== Dashboard ===== -->
+  <main class="view" id="view-dashboard" data-view="dashboard">
+    <div class="view__header">
+      <div>
+        <h1 class="display">Your <em>albums</em></h1>
+        <p class="subtle" id="album-count-line">No albums yet.</p>
+      </div>
+      <button class="btn btn--primary" id="btn-new-album" type="button">New album</button>
+    </div>
+
+    <div class="album-grid" id="album-grid"></div>
+
+    <div class="empty-state" id="empty-state">
+      <p class="display display--sm"><em>Start your first album</em></p>
+      <p class="subtle">Create an album, add photos, choose a layout, and export a finished gallery your client can open in any browser.</p>
+      <button class="btn btn--primary" id="btn-new-album-empty" type="button">New album</button>
+    </div>
+  </main>
+
+  <!-- ===== Album editor ===== -->
+  <main class="view" id="view-editor" data-view="editor" hidden>
+
+    <div class="editor-header">
+      <button class="btn btn--ghost" id="btn-back-dashboard" type="button">← All albums</button>
+      <div class="editor-title">
+        <span class="subtle" id="editor-eyebrow">Editing</span>
+        <h1 class="display display--sm" id="editor-title-text"><em>Untitled album</em></h1>
+      </div>
+      <div class="editor-header__actions">
+        <button class="btn btn--ghost" id="btn-delete-album" type="button">Delete</button>
+        <button class="btn btn--primary" id="btn-export" type="button">Export HTML</button>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="details" type="button">Details</button>
+      <button class="tab" data-tab="photos" type="button">Photos</button>
+      <button class="tab" data-tab="layout" type="button">Layout</button>
+      <button class="tab" data-tab="preview" type="button">Preview</button>
+    </div>
+
+    <!-- Details tab -->
+    <section class="tab-panel is-active" data-panel="details">
+      <div class="form-grid">
+        <label class="field">
+          <span>Album title</span>
+          <input type="text" id="f-title" placeholder="Rahul &amp; Priya Wedding">
+        </label>
+        <label class="field">
+          <span>Client name</span>
+          <input type="text" id="f-client" placeholder="Rahul &amp; Priya">
+        </label>
+        <label class="field">
+          <span>Event type</span>
+          <input type="text" id="f-event-type" placeholder="Wedding">
+        </label>
+        <label class="field">
+          <span>Event date</span>
+          <input type="date" id="f-event-date">
+        </label>
+        <label class="field field--wide">
+          <span>Description</span>
+          <textarea id="f-description" rows="3" placeholder="A short note about the day, shown at the top of the album."></textarea>
+        </label>
+        <label class="field">
+          <span>Photographer / studio name</span>
+          <input type="text" id="f-studio" placeholder="Kalka Digital Photo Studio">
+        </label>
+        <label class="field">
+          <span>Logo</span>
+          <div class="upload-inline">
+            <button class="btn btn--ghost btn--sm" id="btn-upload-logo" type="button">Upload logo</button>
+            <span class="subtle" id="logo-filename">No logo uploaded</span>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <!-- Photos tab -->
+    <section class="tab-panel" data-panel="photos">
+      <div class="dropzone" id="dropzone">
+        <p><strong>Drag photos here</strong> or click to select files</p>
+        <p class="subtle">Uploaded straight to Cloudinary. Nothing is stored locally at full resolution.</p>
+        <input type="file" id="file-input" accept="image/*" multiple hidden>
+      </div>
+      <div class="upload-progress" id="upload-progress" hidden>
+        <div class="upload-progress__bar" id="upload-progress-bar"></div>
+        <span id="upload-progress-label"></span>
+      </div>
+      <p class="subtle photo-hint">Drag a thumbnail to reorder. Click the star to set the cover photo.</p>
+      <div class="photo-grid" id="photo-grid"></div>
+    </section>
+
+    <!-- Layout tab -->
+    <section class="tab-panel" data-panel="layout">
+      <div class="layout-grid" id="layout-grid"></div>
+    </section>
+
+    <!-- Preview tab -->
+    <section class="tab-panel" data-panel="preview">
+      <div class="preview-frame-wrap">
+        <iframe id="preview-frame" title="Album preview"></iframe>
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- ===== Settings modal ===== -->
+<div class="modal-backdrop" id="settings-backdrop" hidden>
+  <div class="modal">
+    <h2 class="display display--sm"><em>Cloudinary</em> settings</h2>
+    <p class="subtle">Needed once, before you upload photos. Create an unsigned upload preset in your Cloudinary dashboard under Settings → Upload.</p>
+    <label class="field">
+      <span>Cloud name</span>
+      <input type="text" id="s-cloud-name" placeholder="your-cloud-name">
+    </label>
+    <label class="field">
+      <span>Unsigned upload preset</span>
+      <input type="text" id="s-upload-preset" placeholder="album-builder-unsigned">
+    </label>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="btn-settings-cancel" type="button">Cancel</button>
+      <button class="btn btn--primary" id="btn-settings-save" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== New album modal ===== -->
+<div class="modal-backdrop" id="new-album-backdrop" hidden>
+  <div class="modal">
+    <h2 class="display display--sm">New <em>album</em></h2>
+    <label class="field">
+      <span>Album title</span>
+      <input type="text" id="n-title" placeholder="Rahul &amp; Priya Wedding">
+    </label>
+    <div class="modal__actions">
+      <button class="btn btn--ghost" id="btn-new-album-cancel" type="button">Cancel</button>
+      <button class="btn btn--primary" id="btn-new-album-create" type="button">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/store.js"></script>
+<script src="js/cloudinary.js"></script>
+<script src="js/export.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
