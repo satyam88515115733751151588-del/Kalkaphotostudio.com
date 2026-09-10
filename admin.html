@@ -282,19 +282,19 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // ====== FILL THESE IN (see SETUP.md) ======
-    const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co/rest/v1/';
-    const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV ';
+    const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV';
     const CLOUDINARY_CLOUD_NAME = 'oovmd9zi'; // e.g. drppdpiyi
     const CLOUDINARY_UPLOAD_PRESET = 'kalkaphotostudio.comß';
     // ===========================================
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const loginScreen = document.getElementById('login-screen');
     const appScreen = document.getElementById('app-screen');
     const whoEl = document.getElementById('who');
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
       if (session) {
         loginScreen.style.display = 'none';
         appScreen.style.display = 'block';
@@ -314,7 +314,7 @@
 
       const email = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
       if (error) {
         msg.textContent = error.message;
@@ -323,7 +323,7 @@
       btn.disabled = false;
     });
 
-    document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
+    document.getElementById('signout-btn').addEventListener('click', () => supabaseClient.auth.signOut());
 
     document.querySelectorAll('.tab-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -363,7 +363,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error?.message || 'Cloudinary upload failed');
 
-        const { error } = await supabase.from('images').insert({ url: data.secure_url, alt, gallery });
+        const { error } = await supabaseClient.from('images').insert({ url: data.secure_url, alt, gallery });
         if (error) throw error;
 
         showMsg('image-msg', 'Image uploaded.', 'success');
@@ -378,7 +378,7 @@
 
     async function loadImages() {
       const tbody = document.getElementById('images-table');
-      const { data, error } = await supabase.from('images').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabaseClient.from('images').select('*').order('created_at', { ascending: false });
       if (error || !data || !data.length) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No images yet.</td></tr>';
         return;
@@ -406,7 +406,7 @@
       }
 
       btn.disabled = true;
-      const { error } = await supabase.from('videos').insert({ youtube_url: url, youtube_id: youtubeId, title });
+      const { error } = await supabaseClient.from('videos').insert({ youtube_url: url, youtube_id: youtubeId, title });
       btn.disabled = false;
 
       if (error) { showMsg('video-msg', error.message, 'error'); return; }
@@ -431,7 +431,7 @@
 
     async function loadVideos() {
       const tbody = document.getElementById('videos-table');
-      const { data, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabaseClient.from('videos').select('*').order('created_at', { ascending: false });
       if (error || !data || !data.length) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No videos yet.</td></tr>';
         return;
@@ -459,7 +459,7 @@
         const htmlContent = await file.text();
         const slug = label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-        const { error } = await supabase.from('sections').insert({
+        const { error } = await supabaseClient.from('sections').insert({
           slug, nav_label: label, html_content: htmlContent,
         });
         if (error) throw error;
@@ -476,7 +476,7 @@
 
     async function loadSections() {
       const tbody = document.getElementById('sections-table');
-      const { data, error } = await supabase.from('sections').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabaseClient.from('sections').select('*').order('created_at', { ascending: false });
       if (error || !data || !data.length) {
         tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No sections yet.</td></tr>';
         return;
@@ -496,7 +496,7 @@
       const id = e.target.dataset.id;
       if (!confirm('Remove this item? This cannot be undone.')) return;
 
-      const { error } = await supabase.from(table).delete().eq('id', id);
+      const { error } = await supabaseClient.from(table).delete().eq('id', id);
       if (error) { alert(error.message); return; }
 
       if (table === 'images') loadImages();
