@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studio Dashboard — Kalka digital</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1c1a17;
+      --paper: #f6f4ef;
+      --surface: #ffffff;
+      --line: #e4e0d8;
+      --muted: #837c6d;
+      --accent: #6b5b46;
+      --error: #a13d3d;
+      --success: #3d6b4a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    h1, h2 { font-family: 'Noto Serif', serif; font-weight: 400; letter-spacing: -0.02em; margin: 0; }
+
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2.4rem;
+    }
+
+    .login-card h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
+    .login-card p.sub { font-size: 0.8rem; color: var(--muted); margin: 0 0 1.8rem; }
+
+    label { display: block; font-size: 0.7rem; letter-spacing: 0.04em; color: var(--muted); margin-bottom: 0.35rem; }
+
+    input, textarea, select {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      margin-bottom: 1.1rem;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    button {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.2rem;
+      cursor: pointer;
+      background: var(--ink);
+      color: var(--paper);
+      transition: opacity 0.2s;
+    }
+
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .msg { font-size: 0.8rem; margin-top: 0.9rem; min-height: 1.2em; }
+    .msg.error { color: var(--error); }
+    .msg.success { color: var(--success); }
+
+    #app-screen { display: none; }
+
+    header.top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 2rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    header.top .who { font-size: 0.75rem; color: var(--muted); }
+    header.top button.signout { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1.2rem 2rem 0;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.78rem;
+    }
+
+    .tab-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.6rem 2rem 4rem;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.8rem;
+      margin-bottom: 2rem;
+    }
+
+    .card h2 { font-size: 1.2rem; margin-bottom: 1.2rem; }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th, td { text-align: left; padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    th { color: var(--muted); font-weight: 500; font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    td.thumb img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; display: block; }
+    td.actions { text-align: right; }
+    .del-btn { background: transparent; color: var(--error); border: 1px solid var(--line); padding: 0.4rem 0.7rem; font-size: 0.72rem; }
+    .empty-row td { color: var(--muted); text-align: center; padding: 1.5rem 0; }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOGIN -->
+  <section id="login-screen">
+    <div class="login-card">
+      <h1>Studio Dashboard</h1>
+      <p class="sub">Sign in to manage Kalka digital's images, videos, and pages.</p>
+      <form id="login-form">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required autocomplete="username" />
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password" />
+        <button type="submit" id="login-btn">Sign in</button>
+        <p class="msg" id="login-msg"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="app-screen">
+    <header class="top">
+      <h1 style="font-size:1.1rem;">Studio Dashboard</h1>
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <span class="who" id="who"></span>
+        <button class="signout" id="signout-btn">Sign out</button>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="images">Images</button>
+      <button class="tab-btn" data-tab="videos">Videos</button>
+      <button class="tab-btn" data-tab="sections">Sections</button>
+    </nav>
+
+    <main>
+      <!-- IMAGES -->
+      <div class="panel active" id="panel-images">
+        <div class="card">
+          <h2>Add an image</h2>
+          <form id="image-form">
+            <label for="image-file">Image file</label>
+            <input type="file" id="image-file" accept="image/*" required />
+            <div class="row">
+              <div>
+                <label for="image-gallery">Belongs on</label>
+                <select id="image-gallery">
+                  <option value="gallery">Gallery</option>
+                  <option value="wedding">Wedding</option>
+                  <option value="family">Family</option>
+                  <option value="haldi-mehndi">Haldi / Mehndi</option>
+                  <option value="home">Home</option>
+                </select>
+              </div>
+              <div>
+                <label for="image-alt">Alt text / caption</label>
+                <input type="text" id="image-alt" placeholder="e.g. Bridal portrait, golden hour" />
+              </div>
+            </div>
+            <button type="submit" id="image-submit">Upload image</button>
+            <p class="msg" id="image-msg"></p>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Existing images</h2>
+          <table>
+            <thead><tr><th></th><th>Belongs on</th><th>Caption</th><th></th></tr></thead>
+            <tbody id="images-table"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIDEOS -->
+      <div class="panel" id="panel-videos">
+        <div class="card">
+          <h2>Add a YouTube video</h2>
+          <form id="video-form">
+            <label for="video-url">YouTube link</label>
+            <input type="url" id="video-url" placeholder="https://www.youtube.com/watch?v=..." required />
+            <label for="video-title">Title</label>
+            <input type="text" id="video-title" placeholder="e.g. Aditi & Raghav — Wedding Film" />
+            <button type="submit" id="video-submit">Add video</button>
+            <p class="msg" id="video-msg"></p>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Existing videos</h2>
+          <table>
+            <thead><tr><th>Title</th><th>Link</th><th></th></tr></thead>
+            <tbody id="videos-table"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SECTIONS -->
+      <div class="panel" id="panel-sections">
+        <div class="card">
+          <h2>Add a new page / navbar section</h2>
+          <p style="font-size:0.8rem;color:var(--muted);margin-top:-0.6rem;">
+            Upload a complete HTML snippet (just the content, not a full page — no
+            &lt;html&gt;/&lt;head&gt; tags needed). It appears as a new link in your navbar.
+          </p>
+          <form id="section-form">
+            <label for="section-label">Navbar label</label>
+            <input type="text" id="section-label" placeholder="e.g. Pricing" required />
+            <label for="section-file">HTML file</label>
+            <input type="file" id="section-file" accept=".html,text/html" required />
+            <button type="submit" id="section-submit">Publish section</button>
+            <p class="msg" id="section-msg"></p>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Existing sections</h2>
+          <table>
+            <thead><tr><th>Nav label</th><th>Link</th><th></th></tr></thead>
+            <tbody id="sections-table"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ====== FILL THESE IN (see SETUP.md) ======
+    const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co/rest/v1/';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV ';
+    const CLOUDINARY_CLOUD_NAME = 'oovmd9zi'; // e.g. drppdpiyi
+    const CLOUDINARY_UPLOAD_PRESET = 'kalkaphotostudio.comß';
+    // ===========================================
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const loginScreen = document.getElementById('login-screen');
+    const appScreen = document.getElementById('app-screen');
+    const whoEl = document.getElementById('who');
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        loginScreen.style.display = 'none';
+        appScreen.style.display = 'block';
+        whoEl.textContent = session.user.email;
+        loadImages(); loadVideos(); loadSections();
+      } else {
+        loginScreen.style.display = 'flex';
+        appScreen.style.display = 'none';
+      }
+    });
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      const msg = document.getElementById('login-msg');
+      btn.disabled = true; msg.textContent = ''; msg.className = 'msg';
+
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        msg.textContent = error.message;
+        msg.className = 'msg error';
+      }
+      btn.disabled = false;
+    });
+
+    document.getElementById('signout-btn').addEventListener('click', () => supabase.auth.signOut());
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    function showMsg(id, text, type) {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'msg ' + type;
+    }
+
+    document.getElementById('image-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('image-submit');
+      const file = document.getElementById('image-file').files[0];
+      const gallery = document.getElementById('image-gallery').value;
+      const alt = document.getElementById('image-alt').value.trim();
+      if (!file) return;
+
+      btn.disabled = true;
+      showMsg('image-msg', 'Uploading to Cloudinary…', '');
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || 'Cloudinary upload failed');
+
+        const { error } = await supabase.from('images').insert({ url: data.secure_url, alt, gallery });
+        if (error) throw error;
+
+        showMsg('image-msg', 'Image uploaded.', 'success');
+        e.target.reset();
+        loadImages();
+      } catch (err) {
+        showMsg('image-msg', err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function loadImages() {
+      const tbody = document.getElementById('images-table');
+      const { data, error } = await supabase.from('images').select('*').order('created_at', { ascending: false });
+      if (error || !data || !data.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No images yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map((img) => `
+        <tr>
+          <td class="thumb"><img src="${img.url}" alt="" /></td>
+          <td>${img.gallery}</td>
+          <td>${img.alt || '—'}</td>
+          <td class="actions"><button class="del-btn" data-table="images" data-id="${img.id}">Remove</button></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('video-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('video-submit');
+      const url = document.getElementById('video-url').value.trim();
+      const title = document.getElementById('video-title').value.trim();
+      const youtubeId = extractYouTubeId(url);
+
+      if (!youtubeId) {
+        showMsg('video-msg', "Couldn't recognize that as a YouTube link.", 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      const { error } = await supabase.from('videos').insert({ youtube_url: url, youtube_id: youtubeId, title });
+      btn.disabled = false;
+
+      if (error) { showMsg('video-msg', error.message, 'error'); return; }
+      showMsg('video-msg', 'Video added.', 'success');
+      e.target.reset();
+      loadVideos();
+    });
+
+    function extractYouTubeId(url) {
+      const patterns = [
+        /(?:youtube\.com\/watch\?v=)([^&]+)/,
+        /(?:youtu\.be\/)([^?]+)/,
+        /(?:youtube\.com\/embed\/)([^?]+)/,
+        /(?:youtube\.com\/shorts\/)([^?]+)/,
+      ];
+      for (const p of patterns) {
+        const m = url.match(p);
+        if (m) return m[1];
+      }
+      return null;
+    }
+
+    async function loadVideos() {
+      const tbody = document.getElementById('videos-table');
+      const { data, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      if (error || !data || !data.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No videos yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map((v) => `
+        <tr>
+          <td>${v.title || '—'}</td>
+          <td><a href="${v.youtube_url}" target="_blank" rel="noopener">Watch ↗</a></td>
+          <td class="actions"><button class="del-btn" data-table="videos" data-id="${v.id}">Remove</button></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('section-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('section-submit');
+      const label = document.getElementById('section-label').value.trim();
+      const file = document.getElementById('section-file').files[0];
+      if (!file) return;
+
+      btn.disabled = true;
+      showMsg('section-msg', 'Publishing…', '');
+
+      try {
+        const htmlContent = await file.text();
+        const slug = label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const { error } = await supabase.from('sections').insert({
+          slug, nav_label: label, html_content: htmlContent,
+        });
+        if (error) throw error;
+
+        showMsg('section-msg', `Published. It will appear in your navbar as "${label}".`, 'success');
+        e.target.reset();
+        loadSections();
+      } catch (err) {
+        showMsg('section-msg', err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function loadSections() {
+      const tbody = document.getElementById('sections-table');
+      const { data, error } = await supabase.from('sections').select('*').order('created_at', { ascending: false });
+      if (error || !data || !data.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No sections yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map((s) => `
+        <tr>
+          <td>${s.nav_label}</td>
+          <td><a href="../section.html?slug=${encodeURIComponent(s.slug)}" target="_blank" rel="noopener">View ↗</a></td>
+          <td class="actions"><button class="del-btn" data-table="sections" data-id="${s.id}">Remove</button></td>
+        </tr>
+      `).join('');
+    }
+
+    document.addEventListener('click', async (e) => {
+      if (!e.target.classList.contains('del-btn')) return;
+      const table = e.target.dataset.table;
+      const id = e.target.dataset.id;
+      if (!confirm('Remove this item? This cannot be undone.')) return;
+
+      const { error } = await supabase.from(table).delete().eq('id', id);
+      if (error) { alert(error.message); return; }
+
+      if (table === 'images') loadImages();
+      if (table === 'videos') loadVideos();
+      if (table === 'sections') loadSections();
+    });
+  </script>
+</body>
+
+</html>
