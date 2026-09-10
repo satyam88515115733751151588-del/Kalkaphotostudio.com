@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kalka digital</title>
+  <title id="page-title">Kalka digital</title>
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="styles.css" />
   <link
@@ -13,25 +13,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
   <style>
-    .dynamic-section-wrap {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 4rem var(--px, 1.5rem);
-      min-height: 50vh;
+    main {
+      padding-top: calc(var(--nav-height) + 24px);
+      min-height: 60vh;
     }
-    .dynamic-section-loading,
-    .dynamic-section-error {
+
+    #section-content {
+      padding: 2rem var(--px) 4rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-not-found {
+      padding: 6rem var(--px);
       text-align: center;
-      color: var(--on-surface-variant, #777);
-      padding: 6rem 1rem;
-      font-size: 0.85rem;
-      letter-spacing: 0.04em;
+      color: var(--on-surface-variant);
     }
   </style>
 </head>
 
 <body>
-  <!-- NAVBAR -->
   <nav class="navbar">
     <a href="index.html" class="navbar-brand">Kalka digital</a>
     <div class="navbar-links">
@@ -58,6 +59,7 @@
       </button>
     </div>
   </nav>
+  <!-- Mobile Menu Overlay -->
   <div class="mobile-menu-overlay">
     <div class="mobile-menu-drawer">
       <div class="mobile-menu-links">
@@ -82,12 +84,9 @@
   </div>
 
   <main>
-    <div class="dynamic-section-wrap" id="section-content">
-      <p class="dynamic-section-loading">Loading…</p>
-    </div>
+    <div id="section-content">Loading…</div>
   </main>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div>
       <div class="footer-brand">Kalka digital</div>
@@ -97,6 +96,8 @@
       <span class="footer-heading">Directory</span>
       <a href="https://www.instagram.com/kalka.studio1999/" target="_blank">Instagram</a>
       <a href="https://www.youtube.com/@KalkaStudio" target="_blank">Youtube</a>
+      <a href="https://www.justdial.com/Delhi/Kalka-Digital-Photo-Studio-Khanpur/011PXX11-XX11-141117175737-Z3Q6_BZDET?auto=1&trkid=2305672264&term=kalka%20studio%20khanpur"
+        target="_blank">Just Dial</a>
       <a href="https://maps.app.goo.gl/UT1yKP69UiYti4FJ9" target="_blank">Google Maps</a>
     </div>
     <div>
@@ -109,38 +110,33 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/site-content.js"></script>
   <script>
-    // Fetch and render the section matching ?slug= from the URL.
+    // Loads the specific section named in ?slug=... from Supabase and renders it.
     (async function () {
+      const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV';
+      const container = document.getElementById('section-content');
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('slug');
-      const container = document.getElementById('section-content');
 
       if (!slug) {
-        container.innerHTML = '<p class="dynamic-section-error">No section specified.</p>';
+        container.innerHTML = '<div class="section-not-found"><h2>No section specified.</h2></div>';
         return;
       }
       if (!window.supabase) {
-        container.innerHTML = '<p class="dynamic-section-error">Could not load this page.</p>';
+        container.innerHTML = '<div class="section-not-found"><h2>Could not load this page.</h2></div>';
         return;
       }
 
-      // Reuses the same project credentials set in assets/site-content.js
-      const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co/rest/v1/ ';
-      const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV';
       const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-      const { data, error } = await client
-        .from('sections')
-        .select('nav_label, html_content')
-        .eq('slug', slug)
-        .single();
+      const { data, error } = await client.from('sections').select('*').eq('slug', slug).maybeSingle();
 
       if (error || !data) {
-        container.innerHTML = '<p class="dynamic-section-error">This page could not be found.</p>';
+        container.innerHTML = '<div class="section-not-found"><h2>Section not found.</h2><p>This page may have been removed.</p></div>';
         return;
       }
 
       document.title = data.nav_label + ' — Kalka digital';
+      document.getElementById('page-title').textContent = data.nav_label + ' — Kalka digital';
       container.innerHTML = data.html_content;
     })();
   </script>

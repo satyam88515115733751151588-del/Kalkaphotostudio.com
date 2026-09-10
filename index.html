@@ -897,20 +897,42 @@
       const slider = document.getElementById('hero-slider');
       const prevBtn = document.getElementById('prev-slide');
       const nextBtn = document.getElementById('next-slide');
-      const dots = document.querySelectorAll('.dot');
-      const slides = document.querySelectorAll('.slide');
+      const dotsContainer = document.getElementById('slide-dots');
       let currentSlide = 0;
 
+      function getSlides() {
+        return Array.from(slider.querySelectorAll('.slide'));
+      }
+
+      function rebuildDots() {
+        const slides = getSlides();
+        dotsContainer.innerHTML = '';
+        slides.forEach((_, i) => {
+          const d = document.createElement('div');
+          d.className = 'dot' + (i === currentSlide ? ' active' : '');
+          d.addEventListener('click', () => goToSlide(i));
+          dotsContainer.appendChild(d);
+        });
+      }
+
       function goToSlide(n) {
+        const slides = getSlides();
+        if (!slides.length) return;
         currentSlide = (n + slides.length) % slides.length;
         slider.scrollTo({ left: currentSlide * slider.clientWidth, behavior: 'smooth' });
-        dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
         slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
       }
 
       prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
       nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
-      dots.forEach((d, i) => d.addEventListener('click', () => goToSlide(i)));
+
+      rebuildDots();
+
+      // Re-sync when site-content.js appends new slides pulled from Supabase
+      window.addEventListener('slides-updated', () => {
+        rebuildDots();
+      });
 
       // Auto-advance
       setInterval(() => goToSlide(currentSlide + 1), 5000);

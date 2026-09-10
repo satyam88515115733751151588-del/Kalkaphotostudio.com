@@ -1,124 +1,189 @@
-/* ---------------------------------------------------------------
-   Kalka Digital — dynamic content loader
-   Add this ONE script tag to every page, right before </body>,
-   after main.js:
-
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-     <script src="assets/site-content.js"></script>
-
-   It does three jobs, all optional per page:
-   1. Always: adds any dashboard-created sections as extra nav links.
-   2. If the page has <div data-dynamic-gallery="wedding"></div>,
-      fills it with dashboard-uploaded images tagged "wedding".
-   3. If the page has <div data-dynamic-videos></div>,
-      fills it with dashboard-added YouTube videos.
------------------------------------------------------------------- */
-
+// assets/site-content.js
+// Pulls images (and videos) uploaded via /admin.html out of Supabase and
+// injects them into the existing static containers on each page, using the
+// same markup/classes as the hand-written cards so they look identical.
 (function () {
-  // ---- fill these in after you create your Supabase project ----
-  const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co/rest/v1/ ';
-  const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaO';
-  // -----------------------------------------------------------------
+  const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV';
 
-  if (!window.supabase) return; // supabase-js failed to load, fail quietly
+  if (!window.supabase) {
+    console.warn('[site-content] Supabase library did not load; skipping dynamic content.');
+    return;
+  }
+
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    await injectNavSections();
-    await fillGalleries();
-    await fillVideos();
-  });
-
-  async function injectNavSections() {
-    const { data, error } = await client
-      .from('sections')
-      .select('slug, nav_label, sort_order')
-      .order('sort_order', { ascending: true });
-    if (error || !data || !data.length) return;
-
-    const desktopNav = document.querySelector('.navbar-links');
-    const mobileNav = document.querySelector('.mobile-menu-links');
-
-    data.forEach((section) => {
-      const href = `section.html?slug=${encodeURIComponent(section.slug)}`;
-
-      if (desktopNav) {
-        const a = document.createElement('a');
-        a.href = href;
-        a.textContent = section.nav_label;
-        desktopNav.appendChild(a);
-      }
-      if (mobileNav) {
-        const a = document.createElement('a');
-        a.href = href;
-        a.className = 'mobile-link';
-        a.textContent = section.nav_label;
-        mobileNav.appendChild(a);
-      }
-    });
-  }
-
-  async function fillGalleries() {
-    const containers = document.querySelectorAll('[data-dynamic-gallery]');
-    if (!containers.length) return;
-
-    for (const container of containers) {
-      const tag = container.getAttribute('data-dynamic-gallery');
-      const { data, error } = await client
-        .from('images')
-        .select('url, alt, sort_order')
-        .eq('gallery', tag)
-        .order('sort_order', { ascending: true });
-      if (error || !data) continue;
-
-      data.forEach((img) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'work-card-img'; // reuses your existing image styling
-        const el = document.createElement('img');
-        el.src = img.url;
-        el.alt = img.alt || '';
-        el.loading = 'lazy';
-        wrap.appendChild(el);
-        container.appendChild(wrap);
-      });
-    }
-  }
-
-  async function fillVideos() {
-    const containers = document.querySelectorAll('[data-dynamic-videos]');
-    if (!containers.length) return;
-
-    const { data, error } = await client
-      .from('videos')
-      .select('youtube_id, title, sort_order')
-      .order('sort_order', { ascending: true });
-    if (error || !data) return;
-
-    containers.forEach((container) => {
-      data.forEach((video) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'dynamic-video-card';
-        wrap.innerHTML = `
-          <div style="position:relative;padding-top:56.25%;border-radius:10px;overflow:hidden;">
-            <iframe
-              src="https://www.youtube.com/embed/${video.youtube_id}"
-              title="${escapeHtml(video.title || '')}"
-              style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy">
-            </iframe>
-          </div>
-          ${video.title ? `<p style="font-size:0.8rem;margin-top:0.5rem;">${escapeHtml(video.title)}</p>` : ''}
-        `;
-        container.appendChild(wrap);
-      });
-    });
-  }
-
   function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, (c) => ({
+    return (str || '').replace(/[&<>"']/g, (c) => ({
       '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
     }[c]));
+  }
+
+  async function loadImages(galleryKey) {
+    const { data, error } = await client
+      .from('images')
+      .select('*')
+      .eq('gallery', galleryKey)
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.error('[site-content] Failed to load images for "' + galleryKey + '":', error.message);
+      return [];
+    }
+    return data || [];
+  }
+
+  // ---- Main Gallery page (masonry grid, id="gallery-grid") ----
+  const galleryGrid = document.getElementById('gallery-grid');
+  if (galleryGrid) {
+    loadImages('gallery').then((images) => {
+      images.forEach((img) => {
+        const caption = escapeHtml(img.alt);
+        galleryGrid.insertAdjacentHTML('afterbegin', `
+          <a class="masonry-item reveal" data-category="all" href="#" data-title="${caption}">
+            <div class="masonry-img">
+              <img src="${img.url}" alt="${caption}" />
+              <div class="masonry-overlay"></div>
+            </div>
+            <div class="masonry-meta">
+              <h3>${caption || 'Untitled'}</h3><span>New</span>
+            </div>
+          </a>
+        `);
+      });
+    });
+  }
+
+  // ---- Wedding gallery (.story-grid) ----
+  const storyGrid = document.querySelector('.story-grid');
+  if (storyGrid) {
+    loadImages('wedding').then((images) => {
+      images.forEach((img) => {
+        const caption = escapeHtml(img.alt);
+        storyGrid.insertAdjacentHTML('afterbegin', `
+          <div class="story-card medium">
+            <img src="${img.url}" alt="${caption}">
+            <div class="story-overlay">
+              <div class="story-meta">
+                <span>Wedding</span>
+                <h2>${caption || 'Untitled'}</h2>
+              </div>
+            </div>
+          </div>
+        `);
+      });
+    });
+  }
+
+  // ---- Family functions (.family-grid) ----
+  const familyGrid = document.querySelector('.family-grid');
+  if (familyGrid) {
+    loadImages('family').then((images) => {
+      images.forEach((img) => {
+        const caption = escapeHtml(img.alt);
+        familyGrid.insertAdjacentHTML('afterbegin', `
+          <div class="family-card">
+            <img src="${img.url}" alt="${caption}">
+            <div class="family-content">
+              <span>New</span>
+              <h3>${caption || 'Untitled'}</h3>
+            </div>
+          </div>
+        `);
+      });
+    });
+  }
+
+  // ---- Haldi / Mehndi (.film-strip) ----
+  const filmStrip = document.querySelector('.film-strip');
+  if (filmStrip) {
+    loadImages('haldi-mehndi').then((images) => {
+      images.forEach((img) => {
+        const caption = escapeHtml(img.alt);
+        filmStrip.insertAdjacentHTML('afterbegin', `
+          <div class="frame">
+            <img src="${img.url}" alt="${caption}">
+            <div class="frame-info">
+              <span>New</span>
+              <h3>${caption || 'Untitled'}</h3>
+            </div>
+          </div>
+        `);
+      });
+    });
+  }
+
+  // ---- Home page hero slider (#hero-slider) ----
+  const heroSlider = document.getElementById('hero-slider');
+  if (heroSlider) {
+    loadImages('home').then((images) => {
+      if (!images.length) return;
+      images.forEach((img) => {
+        heroSlider.insertAdjacentHTML('beforeend', `
+          <div class="slide">
+            <img src="${img.url}" alt="${escapeHtml(img.alt)}" />
+            <div class="slide-overlay"></div>
+          </div>
+        `);
+      });
+      // Let index.html's slider script know new slides/dots need to be rebuilt
+      window.dispatchEvent(new Event('slides-updated'));
+    });
+  }
+
+  // ---- Navbar: inject a link for every published "section" (present on every page) ----
+  const navLinks = document.querySelector('.navbar-links');
+  const mobileLinks = document.querySelector('.mobile-menu-links');
+  if (navLinks || mobileLinks) {
+    client
+      .from('sections')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('[site-content] Failed to load sections:', error.message);
+          return;
+        }
+        (data || []).forEach((s) => {
+          const href = `section.html?slug=${encodeURIComponent(s.slug)}`;
+          const label = escapeHtml(s.nav_label);
+          if (navLinks) {
+            navLinks.insertAdjacentHTML('beforeend', `<a href="${href}">${label}</a>`);
+          }
+          if (mobileLinks) {
+            mobileLinks.insertAdjacentHTML('beforeend', `<a href="${href}" class="mobile-link">${label}</a>`);
+          }
+        });
+      });
+  }
+
+  // ---- Videos (.video-grid) ----
+  const videoGrid = document.querySelector('.video-grid');
+  if (videoGrid) {
+    client
+      .from('videos')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('[site-content] Failed to load videos:', error.message);
+          return;
+        }
+        (data || []).forEach((v) => {
+          const title = escapeHtml(v.title);
+          videoGrid.insertAdjacentHTML('afterbegin', `
+            <div class="video-card">
+              <div class="video-frame">
+                <a href="${v.youtube_url}" target="_blank" rel="noopener">
+                  <img src="https://img.youtube.com/vi/${v.youtube_id}/hqdefault.jpg">
+                </a>
+              </div>
+              <div class="video-info">
+                <span>New</span>
+                <h3>${title || 'Untitled'}</h3>
+              </div>
+            </div>
+          `);
+        });
+      });
   }
 })();
