@@ -498,6 +498,7 @@
       <a href="family-functions.html">Family</a>
       <a href="haldi-mehndi.html">Haldi/Mehndi</a>
       <a href="video-gallery.html">Films</a>
+      <a href="shop.html">Shop</a>
       <a href="about.html" >About</a>
       <a href="contact.html">Contact</a>
     </div>
@@ -524,6 +525,7 @@
         <a href="family-functions.html" class="mobile-link">Family</a>
         <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
         <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="shop.html" class="mobile-link">Shop</a>
         <a href="about.html" class="mobile-link">About</a>
         <a href="contact.html" class="mobile-link">Contact</a>
       </div>
@@ -652,6 +654,69 @@
       </div>
     </section>
 
+    <!-- REVIEWS -->
+    <section class="reviews-section">
+      <div class="reviews-inner">
+        <!-- Section header -->
+        <div class="reviews-header reveal">
+          <span class="section-label">Client Voices</span>
+          <h2>What our clients <em>say</em></h2>
+        </div>
+
+        <!-- Reviews display carousel -->
+        <div class="reviews-carousel reveal reveal-delay-1" id="reviews-carousel">
+          <div class="reviews-track" id="reviews-track">
+            <div class="reviews-empty" id="reviews-empty">
+              <p>Be the first to leave a review.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit form -->
+        <div class="reviews-form-wrap reveal reveal-delay-2">
+          <div class="reviews-form-header">
+            <span class="section-label">Share your experience</span>
+            <h3>Leave a <em>Review</em></h3>
+          </div>
+          <form class="reviews-form" id="reviews-form" novalidate>
+            <div class="reviews-form-row">
+              <div class="reviews-field">
+                <label for="review-name">Your Name</label>
+                <input type="text" id="review-name" name="name" placeholder="Full name" autocomplete="name" required maxlength="100" />
+              </div>
+              <div class="reviews-field">
+                <label for="review-email">Email Address</label>
+                <input type="email" id="review-email" name="email" placeholder="email@example.com" autocomplete="email" required maxlength="200" />
+              </div>
+            </div>
+            <div class="reviews-field reviews-field--rating">
+              <label>Rating</label>
+              <div class="star-rating" id="star-rating" role="radiogroup" aria-label="Rating">
+                <button type="button" class="star" data-value="1" aria-label="1 star">★</button>
+                <button type="button" class="star" data-value="2" aria-label="2 stars">★</button>
+                <button type="button" class="star" data-value="3" aria-label="3 stars">★</button>
+                <button type="button" class="star" data-value="4" aria-label="4 stars">★</button>
+                <button type="button" class="star active" data-value="5" aria-label="5 stars">★</button>
+              </div>
+              <input type="hidden" id="review-rating" name="rating" value="5" />
+            </div>
+            <div class="reviews-field">
+              <label for="review-body">Your Review</label>
+              <textarea id="review-body" name="body" rows="4" placeholder="Tell us about your experience…" required maxlength="2000"></textarea>
+            </div>
+            <div class="reviews-form-footer">
+              <span class="reviews-form-note">Your email is kept private and never displayed.</span>
+              <button type="submit" class="reviews-submit" id="reviews-submit">
+                <span class="reviews-submit-text">Submit Review</span>
+                <span class="reviews-submit-loading" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="reviews-feedback" id="reviews-feedback" role="alert" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- JOURNAL -->
     <section class="journal-section">
       <div class="journal-header reveal">
@@ -712,6 +777,121 @@
 
   <script src="main.js"></script>
   <script>
+    /* ---- REVIEWS ---- */
+    (function () {
+      const API = '/api/reviews';
+      const track = document.getElementById('reviews-track');
+      const emptyMsg = document.getElementById('reviews-empty');
+      const form = document.getElementById('reviews-form');
+      const feedback = document.getElementById('reviews-feedback');
+      const submitBtn = document.getElementById('reviews-submit');
+      const ratingInput = document.getElementById('review-rating');
+      const stars = document.querySelectorAll('.star-rating .star');
+
+      // Star rating interaction
+      function setRating(val) {
+        ratingInput.value = val;
+        stars.forEach(s => {
+          s.classList.toggle('active', parseInt(s.dataset.value, 10) <= val);
+        });
+      }
+
+      stars.forEach(star => {
+        star.addEventListener('click', () => setRating(parseInt(star.dataset.value, 10)));
+        star.addEventListener('mouseenter', () => {
+          const v = parseInt(star.dataset.value, 10);
+          stars.forEach(s => s.classList.toggle('hover', parseInt(s.dataset.value, 10) <= v));
+        });
+        star.addEventListener('mouseleave', () => stars.forEach(s => s.classList.remove('hover')));
+      });
+
+      // Render review cards
+      function buildCard(r) {
+        const div = document.createElement('div');
+        div.className = 'review-card';
+        const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+        const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' }) : '';
+        div.innerHTML = `
+          <div class="review-card-stars">${stars}</div>
+          <p class="review-card-body">${escapeHtml(r.body)}</p>
+          <div class="review-card-meta">
+            <span class="review-card-name">${escapeHtml(r.name)}</span>
+            ${date ? `<span class="review-card-date">${date}</span>` : ''}
+          </div>`;
+        return div;
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+
+      // Load reviews
+      async function loadReviews() {
+        try {
+          const res = await fetch(API);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data && data.length > 0) {
+            if (emptyMsg) emptyMsg.remove();
+            data.forEach(r => track.appendChild(buildCard(r)));
+          }
+        } catch (e) { /* silent fail */ }
+      }
+
+      loadReviews();
+
+      // Submit form
+      form && form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        feedback.textContent = '';
+        feedback.className = 'reviews-feedback';
+
+        const name = form.querySelector('#review-name').value.trim();
+        const email = form.querySelector('#review-email').value.trim();
+        const rating = parseInt(ratingInput.value, 10);
+        const body = form.querySelector('#review-body').value.trim();
+
+        if (!name || !email || !body) {
+          showFeedback('Please fill in all fields.', 'error');
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+
+        try {
+          const res = await fetch(API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, rating, body }),
+          });
+          const json = await res.json();
+          if (res.ok && json.success) {
+            showFeedback('Thank you! Your review has been submitted.', 'success');
+            form.reset();
+            setRating(5);
+            // Prepend new card
+            if (emptyMsg && emptyMsg.parentNode) emptyMsg.remove();
+            const card = buildCard({ name, rating, body, createdAt: new Date().toISOString() });
+            track.insertBefore(card, track.firstChild);
+          } else {
+            showFeedback(json.error || 'Something went wrong. Please try again.', 'error');
+          }
+        } catch {
+          showFeedback('Network error. Please try again.', 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('loading');
+        }
+      });
+
+      function showFeedback(msg, type) {
+        feedback.textContent = msg;
+        feedback.className = 'reviews-feedback reviews-feedback--' + type;
+      }
+    })();
+  </script>
+  <script>
     {
       // Slider logic — wrapped in block scope to avoid const conflicts with main.js
       const slider = document.getElementById('hero-slider');
@@ -750,6 +930,8 @@
       });
     }
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/site-content.js"></script>
 </body>
 
 </html>

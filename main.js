@@ -3,14 +3,9 @@
    ============================================= */
 
 // ---- THEME: apply before paint to prevent flash ----
-// Dark is default; only switch to light if explicitly saved
 (function() {
   const saved = localStorage.getItem('kd-theme');
-  if (saved === 'light') {
-    document.documentElement.removeAttribute('data-theme');
-  } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,85 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ---- AURORA NAVBAR OVERLAY ----
+  // ---- NAVBAR SCROLL ----
   const navbar = document.querySelector('.navbar');
-  if (navbar) {
-    const aurora = document.createElement('canvas');
-    aurora.className = 'navbar-aurora';
-    aurora.setAttribute('aria-hidden', 'true');
-    // Append AFTER other children so it's absolutely positioned on top via z-index
-    navbar.appendChild(aurora);
-
-    const ctx = aurora.getContext('2d');
-    let raf;
-
-    function resizeAurora() {
-      // Use getBoundingClientRect so we get the real rendered size, not flex-distorted offsetWidth
-      const rect = navbar.getBoundingClientRect();
-      aurora.width  = rect.width;
-      aurora.height = rect.height;
-    }
-    // Defer one frame so navbar is fully painted before measuring
-    requestAnimationFrame(resizeAurora);
-    window.addEventListener('resize', resizeAurora);
-
-    // Aurora — vivid curtains of light sweeping across the pill
-    // Each band sweeps horizontally like a real aurora curtain
-    const bands = [
-      { cx: 0.08, speed: 0.00055, phase: 0.0,  color: [60,  230, 180], pulseSpeed: 0.0009, pulsePhase: 0.0  },
-      { cx: 0.32, speed: 0.00040, phase: 1.8,  color: [40,  160, 255], pulseSpeed: 0.0007, pulsePhase: 1.1  },
-      { cx: 0.58, speed: 0.00065, phase: 3.4,  color: [180,  80, 240], pulseSpeed: 0.0011, pulsePhase: 2.3  },
-      { cx: 0.82, speed: 0.00048, phase: 5.1,  color: [60,  210, 230], pulseSpeed: 0.0008, pulsePhase: 3.7  },
-      { cx: 0.45, speed: 0.00035, phase: 0.9,  color: [120, 255, 160], pulseSpeed: 0.0006, pulsePhase: 4.2  },
-    ];
-
-    let last = 0, t = 0;
-    function drawAurora(ts) {
-      const dt = Math.min(ts - last, 50); // cap dt so a background tab doesn't snap
-      last = ts;
-      t += dt;
-
-      const w = aurora.width, h = aurora.height;
-      ctx.clearRect(0, 0, w, h);
-
-      bands.forEach(b => {
-        // Sweep: center x oscillates widely left-to-right across the full pill
-        const sweep = Math.sin(t * b.speed + b.phase);
-        const cx = (b.cx + sweep * 0.55) * w;
-
-        // Pulse: opacity breathes in and out
-        const pulse = 0.55 + 0.45 * Math.sin(t * b.pulseSpeed + b.pulsePhase);
-
-        // Vertical wobble: center y ripples gently
-        const cy = h * (0.5 + 0.28 * Math.cos(t * b.speed * 0.7 + b.phase * 1.3));
-
-        // Radius: wide horizontal ellipse — stretch x more than y
-        const rx = w * (0.38 + 0.12 * Math.abs(sweep));
-        const ry = h * (0.65 + 0.25 * pulse);
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.scale(1, ry / rx); // squash into horizontal ellipse
-
-        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-        const [r, g, bl] = b.color;
-        const alpha = pulse * 0.72;
-        grad.addColorStop(0,    `rgba(${r},${g},${bl},${alpha.toFixed(2)})`);
-        grad.addColorStop(0.35, `rgba(${r},${g},${bl},${(alpha * 0.5).toFixed(2)})`);
-        grad.addColorStop(0.7,  `rgba(${r},${g},${bl},${(alpha * 0.15).toFixed(2)})`);
-        grad.addColorStop(1,    `rgba(${r},${g},${bl},0)`);
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, rx, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      });
-
-      raf = requestAnimationFrame(drawAurora);
-    }
-    raf = requestAnimationFrame(drawAurora);
-  }
   if (navbar) {
     window.addEventListener('scroll', () => {
       navbar.classList.toggle('scrolled', window.scrollY > 20);
