@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalka digital</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <style>
+    .dynamic-section-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 4rem var(--px, 1.5rem);
+      min-height: 50vh;
+    }
+    .dynamic-section-loading,
+    .dynamic-section-error {
+      text-align: center;
+      color: var(--on-surface-variant, #777);
+      padding: 6rem 1rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">Kalka digital</a>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="wedding-gallery.html">Wedding</a>
+      <a href="family-functions.html">Family</a>
+      <a href="haldi-mehndi.html">Haldi/Mehndi</a>
+      <a href="video-gallery.html">Films</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </div>
+    <div class="navbar-controls">
+      <a href="contact.html" class="btn-book">Book a Session</a>
+      <button class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="material-symbols-outlined icon-sun">light_mode</span>
+        <span class="material-symbols-outlined icon-moon">dark_mode</span>
+      </button>
+      <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="menu-toggle-box">
+          <span class="menu-toggle-inner"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu-overlay">
+    <div class="mobile-menu-drawer">
+      <div class="mobile-menu-links">
+        <a href="index.html" class="mobile-link">Home</a>
+        <a href="gallery.html" class="mobile-link">Gallery</a>
+        <a href="wedding-gallery.html" class="mobile-link">Wedding</a>
+        <a href="family-functions.html" class="mobile-link">Family</a>
+        <a href="haldi-mehndi.html" class="mobile-link">Haldi/Mehndi</a>
+        <a href="video-gallery.html" class="mobile-link">Films</a>
+        <a href="shop.html" class="mobile-link">Shop</a>
+        <a href="about.html" class="mobile-link">About</a>
+        <a href="contact.html" class="mobile-link">Contact</a>
+      </div>
+      <div class="mobile-drawer-footer">
+        <a href="contact.html" class="btn-book-mobile">Book a Session</a>
+        <button class="mobile-theme-toggle" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined icon-sun">light_mode</span>
+          <span class="material-symbols-outlined icon-moon">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="dynamic-section-wrap" id="section-content">
+      <p class="dynamic-section-loading">Loading…</p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>
+      <div class="footer-brand">Kalka digital</div>
+      <p>© 2026 Kalka digital. All Rights Reserved.</p>
+    </div>
+    <div>
+      <span class="footer-heading">Directory</span>
+      <a href="https://www.instagram.com/kalka.studio1999/" target="_blank">Instagram</a>
+      <a href="https://www.youtube.com/@KalkaStudio" target="_blank">Youtube</a>
+      <a href="https://maps.app.goo.gl/UT1yKP69UiYti4FJ9" target="_blank">Google Maps</a>
+    </div>
+    <div>
+      <span class="footer-heading">Contact</span>
+      <span>kalkastd@gmail.com</span>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/site-content.js"></script>
+  <script>
+    // Fetch and render the section matching ?slug= from the URL.
+    (async function () {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug');
+      const container = document.getElementById('section-content');
+
+      if (!slug) {
+        container.innerHTML = '<p class="dynamic-section-error">No section specified.</p>';
+        return;
+      }
+      if (!window.supabase) {
+        container.innerHTML = '<p class="dynamic-section-error">Could not load this page.</p>';
+        return;
+      }
+
+      // Reuses the same project credentials set in assets/site-content.js
+      const SUPABASE_URL = 'https://lzrtgzhqfythmmjhgcph.supabase.co/rest/v1/ ';
+      const SUPABASE_ANON_KEY = 'sb_publishable_VIXCu1Rlzb-Wu8l4SpeAJw_BVRsxaOV';
+      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const { data, error } = await client
+        .from('sections')
+        .select('nav_label, html_content')
+        .eq('slug', slug)
+        .single();
+
+      if (error || !data) {
+        container.innerHTML = '<p class="dynamic-section-error">This page could not be found.</p>';
+        return;
+      }
+
+      document.title = data.nav_label + ' — Kalka digital';
+      container.innerHTML = data.html_content;
+    })();
+  </script>
+</body>
+
+</html>
