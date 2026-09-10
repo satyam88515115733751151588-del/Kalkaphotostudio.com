@@ -452,37 +452,41 @@
 
   <script src="main.js"></script>
   <script>
-    // Filter
+    // Filter (re-queries the grid live, so photos added later by the admin panel are included too)
     const tabs = document.querySelectorAll('.filter-tab');
-    const items = document.querySelectorAll('.masonry-item');
+    const grid = document.getElementById('gallery-grid');
+
+    function applyFilter(filter) {
+      grid.querySelectorAll('.masonry-item').forEach(item => {
+        const match = filter === 'all' || item.dataset.category === filter;
+        item.style.opacity = match ? '1' : '0.25';
+        item.style.pointerEvents = match ? 'auto' : 'none';
+        item.style.transition = 'opacity 0.4s';
+      });
+    }
+
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        const filter = tab.dataset.filter;
-        items.forEach(item => {
-          const match = filter === 'all' || item.dataset.category === filter;
-          item.style.opacity = match ? '1' : '0.25';
-          item.style.pointerEvents = match ? 'auto' : 'none';
-          item.style.transition = 'opacity 0.4s';
-        });
+        applyFilter(tab.dataset.filter);
       });
     });
 
-    // Lightbox
+    // Lightbox (event delegation on the grid, so it also works on photos added later)
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lb-img');
     const lbCaption = document.getElementById('lb-caption');
     const lbClose = document.getElementById('lb-close');
 
-    items.forEach(item => {
-      item.addEventListener('click', e => {
-        e.preventDefault();
-        lbImg.src = item.querySelector('img').src;
-        lbCaption.textContent = item.dataset.title || '';
-        lb.classList.add('open');
-        document.body.style.overflow = 'hidden';
-      });
+    grid.addEventListener('click', e => {
+      const item = e.target.closest('.masonry-item');
+      if (!item) return;
+      e.preventDefault();
+      lbImg.src = item.querySelector('img').src;
+      lbCaption.textContent = item.dataset.title || '';
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
     });
     lbClose.addEventListener('click', () => {
       lb.classList.remove('open');
