@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kalka Digital - Quote Generator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --red:#E30613;
+    --cream:#FFF2CD;
+    --ink:#222;
+    --border:#c9c9c9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    background:#eef0f2;
+    margin:0;
+    padding:24px;
+    color:var(--ink);
+  }
+  h1.page-title{
+    text-align:center;
+    font-size:22px;
+    margin:0 0 20px;
+    color:#333;
+  }
+  .app{
+    display:flex;
+    gap:24px;
+    max-width:1300px;
+    margin:0 auto;
+    align-items:flex-start;
+  }
+  /* ---------- FORM PANEL ---------- */
+  .form-panel{
+    flex:0 0 420px;
+    background:#fff;
+    border-radius:10px;
+    padding:20px 22px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.12);
+    max-height:calc(100vh - 48px);
+    overflow-y:auto;
+  }
+  .form-panel h2{
+    font-size:15px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--red);
+    border-bottom:2px solid var(--red);
+    padding-bottom:6px;
+    margin:22px 0 12px;
+  }
+  .form-panel h2:first-child{margin-top:0;}
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:#444;
+    margin:10px 0 4px;
+  }
+  input[type=text], input[type=number], input[type=date]{
+    width:100%;
+    padding:7px 9px;
+    border:1px solid var(--border);
+    border-radius:5px;
+    font-size:13.5px;
+    font-family:inherit;
+  }
+  .row2{display:flex; gap:10px;}
+  .row2 > div{flex:1;}
+  .item-row{
+    display:grid;
+    grid-template-columns:1fr 46px 90px 30px;
+    gap:6px;
+    align-items:center;
+    margin-bottom:6px;
+  }
+  .item-row input[type=text]{font-size:12.5px; padding:6px;}
+  .item-row input[type=number]{font-size:12.5px; padding:6px;}
+  .item-row .taxed-chk{width:auto; margin:0 auto; display:block;}
+  .remove-btn{
+    background:#fbdada; color:#a10000; border:none; border-radius:4px;
+    width:26px; height:26px; cursor:pointer; font-size:14px; line-height:1;
+  }
+  .item-head{
+    display:grid;
+    grid-template-columns:1fr 46px 90px 30px;
+    gap:6px;
+    font-size:11px;
+    font-weight:700;
+    color:#666;
+    text-transform:uppercase;
+    margin-top:8px;
+  }
+  .add-row-btn{
+    margin-top:8px;
+    background:var(--red);
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:5px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .add-row-btn:hover{opacity:.9;}
+  .sig-upload{
+    border:1.5px dashed var(--border);
+    border-radius:6px;
+    padding:12px;
+    text-align:center;
+    font-size:12.5px;
+    color:#666;
+    margin-top:6px;
+  }
+  .sig-preview{
+    margin-top:8px;
+    max-width:100%;
+    max-height:70px;
+  }
+  .download-btn{
+    width:100%;
+    margin-top:24px;
+    background:#1a7a35;
+    color:#fff;
+    border:none;
+    padding:13px;
+    border-radius:6px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .download-btn:hover{opacity:.92;}
+  .hint{
+    font-size:11.5px;
+    color:#888;
+    margin-top:4px;
+    line-height:1.4;
+  }
+
+  /* ---------- PREVIEW PANEL ---------- */
+  .preview-wrap{
+    flex:1;
+    display:flex;
+    justify-content:center;
+  }
+  #quote{
+    width:794px;
+    min-height:1050px;
+    background:#fff;
+    border:2px solid var(--red);
+    padding:32px 40px 40px;
+    box-shadow:0 1px 6px rgba(0,0,0,0.15);
+    font-size:13px;
+    color:#1a1a1a;
+  }
+  .q-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .q-shopname{
+    font-size:26px;
+    font-weight:800;
+    margin:0 0 6px;
+  }
+  .q-shop-info{font-size:12px; line-height:1.55; margin:0;}
+  .q-quote-word{
+    font-size:34px;
+    font-weight:800;
+    color:var(--red);
+    letter-spacing:.03em;
+  }
+  .meta-table{
+    border-collapse:collapse;
+    margin-top:6px;
+  }
+  .meta-table td{
+    padding:3px 8px;
+    font-size:12px;
+  }
+  .meta-table td.meta-label{
+    text-align:right;
+    font-weight:700;
+    color:#333;
+  }
+  .meta-table td.meta-val{
+    background:var(--cream);
+    min-width:110px;
+    text-align:center;
+  }
+  .cust-block{margin-top:22px;}
+  .band{
+    background:var(--red);
+    color:#fff;
+    font-weight:700;
+    font-size:12.5px;
+    padding:5px 10px;
+    letter-spacing:.03em;
+  }
+  .cust-fields{
+    background:var(--cream);
+    padding:8px 10px 12px;
+    font-size:13px;
+    line-height:1.9;
+    min-height:90px;
+  }
+  table.items{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:22px;
+  }
+  table.items thead td{
+    background:var(--red);
+    color:#fff;
+    font-weight:700;
+    font-size:12.5px;
+    padding:5px 10px;
+  }
+  table.items thead td.tc{text-align:center;}
+  table.items thead td.ac{text-align:right;}
+  table.items tbody td{
+    background:var(--cream);
+    border-left:1px solid #e8d9ab;
+    padding:5px 10px;
+    font-size:12.5px;
+    vertical-align:top;
+  }
+  table.items tbody td.tc{text-align:center;}
+  table.items tbody td.ac{text-align:right;}
+  table.items tbody tr td:first-child{border-left:none;}
+  .filler-row td{height:22px;}
+  .totals-table{
+    width:260px;
+    margin-left:auto;
+    margin-top:4px;
+    border-collapse:collapse;
+  }
+  .totals-table td{
+    padding:4px 10px;
+    font-size:12.5px;
+  }
+  .totals-table td.tl{
+    text-align:right;
+    font-weight:600;
+    color:#333;
+  }
+  .totals-table td.tv{
+    text-align:right;
+    background:var(--cream);
+    min-width:90px;
+  }
+  .totals-table tr.grand td{
+    font-weight:800;
+    font-size:13.5px;
+    border-top:2px solid var(--red);
+  }
+  .terms-wrap{
+    display:flex;
+    justify-content:space-between;
+    margin-top:26px;
+    gap:30px;
+  }
+  .terms{flex:1; font-size:11.5px; line-height:1.7;}
+  .terms .band{margin-bottom:6px;}
+  .accept{margin-top:14px;}
+  .sig-line{
+    margin-top:18px;
+    font-size:13px;
+  }
+  .sig-img-box{
+    height:55px;
+    display:flex;
+    align-items:flex-end;
+    margin-bottom:-6px;
+  }
+  .sig-img-box img{max-height:55px; max-width:220px;}
+  .footer-note{
+    margin-top:26px;
+    font-size:11.5px;
+    line-height:1.7;
+    text-align:center;
+    color:#333;
+  }
+  .footer-note .thanks{
+    font-weight:700;
+    font-size:13px;
+    margin-top:4px;
+  }
+
+  @media print{
+    body{background:#fff; padding:0;}
+    .form-panel, h1.page-title{display:none;}
+    .app{display:block; max-width:none;}
+    .preview-wrap{justify-content:flex-start;}
+    #quote{box-shadow:none; border:none; width:100%; margin:0;}
+  }
+  @media (max-width:900px){
+    .app{flex-direction:column;}
+    .form-panel{flex:none; width:100%; max-height:none;}
+    #quote{width:100%; padding:20px;}
+  }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Kalka Digital — Quote Generator</h1>
+
+<div class="app">
+
+  <!-- ===================== FORM PANEL ===================== -->
+  <div class="form-panel">
+
+    <h2>Quote Details</h2>
+    <div class="row2">
+      <div>
+        <label>Date</label>
+        <input type="date" id="f_date">
+      </div>
+      <div>
+        <label>Valid Until</label>
+        <input type="date" id="f_valid">
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <label>Quote #</label>
+        <input type="text" id="f_quoteno" placeholder="e.g. 180926">
+      </div>
+      <div>
+        <label>Customer ID</label>
+        <input type="text" id="f_custid" placeholder="e.g. 0042">
+      </div>
+    </div>
+    <label>Prepared By (salesperson name)</label>
+    <input type="text" id="f_prepared" placeholder="Salesperson name">
+
+    <h2>Customer</h2>
+    <label>Name</label>
+    <input type="text" id="c_name" placeholder="Customer name">
+    <label>Company Name</label>
+    <input type="text" id="c_company" placeholder="Company name (optional)">
+    <label>Street Address</label>
+    <input type="text" id="c_street" placeholder="Street address">
+    <label>City, State ZIP</label>
+    <input type="text" id="c_citystate" placeholder="City, ST ZIP">
+    <label>Phone</label>
+    <input type="text" id="c_phone" placeholder="Customer phone">
+
+    <h2>Line Items</h2>
+    <div class="item-head">
+      <div>Description</div><div style="text-align:center;">Taxed</div><div style="text-align:right;">Amount</div><div></div>
+    </div>
+    <div id="itemsContainer"></div>
+    <button type="button" class="add-row-btn" id="addRowBtn">+ Add Line Item</button>
+
+    <h2>Charges</h2>
+    <div class="row2">
+      <div>
+        <label>Tax Rate (%)</label>
+        <input type="number" id="f_taxrate" value="0" step="0.01" min="0">
+      </div>
+      <div>
+        <label>Other Charges (₹)</label>
+        <input type="number" id="f_other" value="0" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="hint">Subtotal, taxable amount, tax due and the grand total are calculated automatically from the line items above.</div>
+
+    <h2>Signature</h2>
+    <label>Upload signature (PNG)</label>
+    <input type="file" id="f_sig" accept="image/png">
+    <div class="sig-upload" id="sigDropHint">No signature uploaded yet</div>
+    <img id="sigPreviewThumb" class="sig-preview" style="display:none;">
+
+    <h2>Contact Note</h2>
+    <label>Contact for questions (name, phone, email)</label>
+    <input type="text" id="f_contact" placeholder="e.g. Rohan, 9999980621, info@kalkaphotostudio.com">
+
+    <button type="button" class="download-btn" id="downloadBtn">⬇ Download as PDF</button>
+    <div class="hint">The preview on the right updates live as you type. Click "Download as PDF" to save the quote.</div>
+  </div>
+
+  <!-- ===================== PREVIEW PANEL ===================== -->
+  <div class="preview-wrap">
+    <div id="quote">
+
+      <div class="q-top">
+        <div>
+          <p class="q-shopname">Kalka Digital</p>
+          <p class="q-shop-info">
+            Shop No. D24A, Devli Rd, Khanpur Extension, Khanpur<br>
+            New Delhi, Delhi 110062<br>
+            Website: Kalkaphotostudio.com<br>
+            Phone: 9999980621<br>
+            Fax:<br>
+            Prepared by: <span id="p_prepared">[salesperson name]</span>
+          </p>
+        </div>
+        <div style="text-align:right;">
+          <div class="q-quote-word">QUOTE</div>
+          <table class="meta-table">
+            <tr><td class="meta-label">DATE</td><td class="meta-val" id="p_date">Dd-mm-yyyy</td></tr>
+            <tr><td class="meta-label">QUOTE #</td><td class="meta-val" id="p_quoteno">Ddmmyy1to1000</td></tr>
+            <tr><td class="meta-label">CUSTOMER ID</td><td class="meta-val" id="p_custid">Xxxx</td></tr>
+            <tr><td class="meta-label">VALID UNTIL</td><td class="meta-val" id="p_valid">DD-MM-yyyy</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="cust-block">
+        <div class="band">CUSTOMER</div>
+        <div class="cust-fields">
+          <div id="p_c_name">[Name]</div>
+          <div id="p_c_company">[Company Name]</div>
+          <div id="p_c_street">[Street Address]</div>
+          <div id="p_c_citystate">[City, ST ZIP]</div>
+          <div id="p_c_phone">[Phone]</div>
+        </div>
+      </div>
+
+      <table class="items">
+        <thead>
+          <tr>
+            <td>DESCRIPTION</td>
+            <td class="tc" style="width:70px;">TAXED</td>
+            <td class="ac" style="width:110px;">AMOUNT</td>
+          </tr>
+        </thead>
+        <tbody id="p_items"></tbody>
+      </table>
+
+      <table class="totals-table">
+        <tr><td class="tl">Subtotal</td><td class="tv" id="p_subtotal">0.00</td></tr>
+        <tr><td class="tl">Taxable</td><td class="tv" id="p_taxable">0.00</td></tr>
+        <tr><td class="tl">Tax rate</td><td class="tv" id="p_taxrate">0.00%</td></tr>
+        <tr><td class="tl">Tax due</td><td class="tv" id="p_taxdue">0.00</td></tr>
+        <tr><td class="tl">Other</td><td class="tv" id="p_other">0.00</td></tr>
+        <tr class="grand"><td class="tl">TOTAL</td><td class="tv" id="p_total">0.00</td></tr>
+      </table>
+
+      <div class="terms-wrap">
+        <div class="terms">
+          <div class="band">TERMS AND CONDITIONS</div>
+          1. Customer will be billed after indicating acceptance of this quote<br>
+          2. Payment will be due prior to delivery of service and goods<br>
+          3. Please fax or mail the signed price quote to the address above
+          <div class="accept">
+            <strong>Customer Acceptance (sign below):</strong>
+            <div class="sig-line">
+              X __________________________________________
+              <div class="sig-img-box"><img id="p_sig" style="display:none;"></div>
+              <div style="border-top:1px solid #333; width:320px; margin-top:2px; padding-top:2px;">Signature</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        If you have any questions about this price quote, please contact<br>
+        <span id="p_contact">[Name, Phone #, E-mail]</span>
+        <div class="thanks">Thank You For Your Business!</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- STATE ---------------- */
+let items = [
+  {desc:'', taxed:false, amount:0},
+  {desc:'', taxed:false, amount:0},
+  {desc:'', taxed:false, amount:0}
+];
+let sigDataUrl = null;
+
+const itemsContainer = document.getElementById('itemsContainer');
+
+function renderFormRows(){
+  itemsContainer.innerHTML = '';
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Item description" data-idx="${idx}" data-field="desc" value="${escapeAttr(item.desc)}">
+      <input type="checkbox" class="taxed-chk" data-idx="${idx}" data-field="taxed" ${item.taxed ? 'checked' : ''}>
+      <input type="number" step="0.01" placeholder="0.00" data-idx="${idx}" data-field="amount" value="${item.amount}">
+      <button type="button" class="remove-btn" data-idx="${idx}" title="Remove row">✕</button>
+    `;
+    itemsContainer.appendChild(row);
+  });
+
+  itemsContainer.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', onItemFieldChange);
+    inp.addEventListener('change', onItemFieldChange);
+  });
+  itemsContainer.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      items.splice(idx, 1);
+      renderFormRows();
+      renderPreview();
+    });
+  });
+}
+
+function escapeAttr(s){
+  return (s || '').replace(/"/g, '&quot;');
+}
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.innerText = s || '';
+  return d.innerHTML;
+}
+
+function onItemFieldChange(e){
+  const idx = parseInt(e.target.dataset.idx);
+  const field = e.target.dataset.field;
+  if(field === 'taxed'){
+    items[idx].taxed = e.target.checked;
+  } else if(field === 'amount'){
+    items[idx].amount = parseFloat(e.target.value) || 0;
+  } else {
+    items[idx].desc = e.target.value;
+  }
+  renderPreview();
+}
+
+document.getElementById('addRowBtn').addEventListener('click', () => {
+  items.push({desc:'', taxed:false, amount:0});
+  renderFormRows();
+  renderPreview();
+});
+
+/* ---------------- SIGNATURE UPLOAD ---------------- */
+document.getElementById('f_sig').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    sigDataUrl = ev.target.result;
+    document.getElementById('sigDropHint').style.display = 'none';
+    const thumb = document.getElementById('sigPreviewThumb');
+    thumb.src = sigDataUrl;
+    thumb.style.display = 'block';
+    renderPreview();
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ---------------- FIELD BINDINGS ---------------- */
+const fieldMap = [
+  ['f_date','p_date', v => formatDate(v) || 'Dd-mm-yyyy'],
+  ['f_valid','p_valid', v => formatDate(v) || 'DD-MM-yyyy'],
+  ['f_quoteno','p_quoteno', v => v || 'Ddmmyy1to1000'],
+  ['f_custid','p_custid', v => v || 'Xxxx'],
+  ['f_prepared','p_prepared', v => v || '[salesperson name]'],
+  ['c_name','p_c_name', v => v || '[Name]'],
+  ['c_company','p_c_company', v => v || '[Company Name]'],
+  ['c_street','p_c_street', v => v || '[Street Address]'],
+  ['c_citystate','p_c_citystate', v => v || '[City, ST ZIP]'],
+  ['c_phone','p_c_phone', v => v || '[Phone]'],
+  ['f_contact','p_contact', v => v || '[Name, Phone #, E-mail]'],
+];
+
+function formatDate(v){
+  if(!v) return '';
+  const [y,m,d] = v.split('-');
+  return `${d}-${m}-${y}`;
+}
+
+fieldMap.forEach(([inputId, targetId, fmt]) => {
+  const el = document.getElementById(inputId);
+  el.addEventListener('input', () => {
+    document.getElementById(targetId).innerText = fmt(el.value);
+  });
+});
+
+['f_taxrate','f_other'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderPreview);
+});
+
+/* ---------------- PREVIEW RENDER ---------------- */
+function renderPreview(){
+  // items table
+  const tbody = document.getElementById('p_items');
+  tbody.innerHTML = '';
+  const MIN_ROWS = 8;
+  const rowCount = Math.max(items.length, MIN_ROWS);
+  for(let i=0;i<rowCount;i++){
+    const it = items[i];
+    const tr = document.createElement('tr');
+    if(it){
+      tr.innerHTML = `
+        <td>${escapeHtml(it.desc)}</td>
+        <td class="tc">${it.taxed ? 'X' : ''}</td>
+        <td class="ac">${it.amount ? it.amount.toFixed(2) : ''}</td>
+      `;
+    } else {
+      tr.className = 'filler-row';
+      tr.innerHTML = `<td>&nbsp;</td><td class="tc"></td><td class="ac"></td>`;
+    }
+    tbody.appendChild(tr);
+  }
+
+  const subtotal = items.reduce((s,it) => s + (it.amount || 0), 0);
+  const taxable = items.reduce((s,it) => s + (it.taxed ? (it.amount || 0) : 0), 0);
+  const taxRate = parseFloat(document.getElementById('f_taxrate').value) || 0;
+  const other = parseFloat(document.getElementById('f_other').value) || 0;
+  const taxDue = taxable * (taxRate/100);
+  const total = subtotal + taxDue + other;
+
+  document.getElementById('p_subtotal').innerText = subtotal.toFixed(2);
+  document.getElementById('p_taxable').innerText = taxable.toFixed(2);
+  document.getElementById('p_taxrate').innerText = taxRate.toFixed(2) + '%';
+  document.getElementById('p_taxdue').innerText = taxDue.toFixed(2);
+  document.getElementById('p_other').innerText = other.toFixed(2);
+  document.getElementById('p_total').innerText = total.toFixed(2);
+
+  const sigImg = document.getElementById('p_sig');
+  if(sigDataUrl){
+    sigImg.src = sigDataUrl;
+    sigImg.style.display = 'block';
+  } else {
+    sigImg.style.display = 'none';
+  }
+}
+
+/* ---------------- PDF DOWNLOAD ---------------- */
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const quoteEl = document.getElementById('quote');
+  const btn = document.getElementById('downloadBtn');
+  const originalText = btn.innerText;
+  btn.innerText = 'Generating PDF...';
+  btn.disabled = true;
+
+  html2canvas(quoteEl, {scale:2, useCORS:true, backgroundColor:'#ffffff'}).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    if(imgHeight <= pageHeight){
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+    } else {
+      // split across multiple pages
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      while(heightLeft > 0){
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+    }
+
+    const quoteNo = document.getElementById('f_quoteno').value || 'quote';
+    pdf.save(`Kalka_Digital_Quote_${quoteNo}.pdf`);
+    btn.innerText = originalText;
+    btn.disabled = false;
+  }).catch(err => {
+    console.error(err);
+    alert('Something went wrong generating the PDF. Please try again.');
+    btn.innerText = originalText;
+    btn.disabled = false;
+  });
+});
+
+/* ---------------- INIT ---------------- */
+renderFormRows();
+renderPreview();
+</script>
+
+</body>
+</html>
