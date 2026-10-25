@@ -1,4 +1,3 @@
-<script>
 (function () {
   var SHOP_URL = "/contact.html"; // change this to your shop page link
 
@@ -41,4 +40,3 @@
   window.addEventListener("resize", adjust);
   window.addEventListener("load", adjust);
 })();
-</script>
