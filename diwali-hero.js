@@ -27,6 +27,7 @@
   let skyGrad, houseCanvas;
   let stars = [], bulbs = [], diyas = [], lanterns = [];
   let rockets = [], particles = [], flashes = [];
+  let drag = null, suppressClick = false;
   let t = 0, nextShot = 700, running = false, raf = 0, last = 0;
 
   /* ---------- glow sprites (cached) ---------- */
@@ -261,7 +262,8 @@
       y: initial ? rand(0.05, 0.95) * groundY : groundY - rand(0, 10),
       s, v: (0.14 + depth * 0.2 + rand(0, 0.08)) * sc,
       sa: rand(8, 22), sf: rand(0.3, 0.7), sp: rand(0, TAU), fp: rand(0, TAU),
-      al: 0.55 + 0.45 * clamp(depth, 0, 1), drift: rand(-0.05, 0.12)
+      al: 0.55 + 0.45 * clamp(depth, 0, 1), drift: rand(-0.05, 0.12),
+      swk: 1, held: false, fvx: 0, fvy: 0, dvx: 0, dvy: 0, ox: 0, oy: 0, tilt: 0
     };
   }
   function initLanterns() {
@@ -272,18 +274,18 @@
   }
   function drawLantern(L) {
     const w = L.s, hh = L.s * 1.3;
-    const x = L.x + Math.sin(t * L.sf + L.sp) * L.sa;
+    const x = L.x + Math.sin(t * L.sf + L.sp) * L.sa * L.swk;
     const fl = 0.85 + 0.15 * Math.sin(t * 7 + L.fp) + (Math.random() - 0.5) * 0.05;
-    const rise = clamp((groundY - L.y + 10) / 80, 0, 1);       // fade in off the rooftops
-    const fade = clamp((L.y + hh) / (H * 0.15), 0, 1);          // fade out near the top
+    const rise = L.held ? 1 : clamp((groundY - L.y + 10) / 80, 0, 1);       // fade in off the rooftops
+    const fade = L.held ? 1 : clamp((L.y + hh) / (H * 0.15), 0, 1);          // fade out near the top
     const al = L.al * rise * fade;
     if (al <= 0.01) return;
     ctx.save();
     ctx.translate(x, L.y);
-    ctx.rotate(Math.cos(t * L.sf + L.sp) * 0.06);
+    ctx.rotate(Math.cos(t * L.sf + L.sp) * 0.06 * L.swk + L.tilt);
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = al * 0.55 * fl;
-    const hs = w * 4.2;
+    ctx.globalAlpha = Math.min(1, al * 0.55 * fl * (L.held ? 1.5 : 1));
+    const hs = w * (L.held ? 5 : 4.2);
     ctx.drawImage(lanternGlow, -hs / 2, -hs / 2, hs, hs);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = al;
@@ -434,8 +436,25 @@
     }
     // lanterns
     for (const L of lanterns) {
+      if (L.held && drag) {
+        // follow the finger / cursor with a little lag, and track velocity for the throw
+        const tx = drag.x + L.ox, ty = clamp(drag.y + L.oy, -L.s * 0.5, groundY - 20);
+        const px = L.x, py = L.y, k = Math.min(1, 0.4 * dt);
+        L.x += (tx - L.x) * k; L.y += (ty - L.y) * k;
+        L.dvx += ((L.x - px) / dt - L.dvx) * 0.3;
+        L.dvy += ((L.y - py) / dt - L.dvy) * 0.3;
+        L.tilt += (clamp(L.dvx * 0.05, -0.4, 0.4) - L.tilt) * 0.2 * dt;
+        L.swk = 0;
+        continue;
+      }
+      // free flight: gentle rise + whatever momentum a throw left behind
       L.y -= L.v * dt; L.x += L.drift * dt;
-      if (L.y < -L.s * 2 || L.x > W + 60) {
+      L.x += L.fvx * dt; L.y += L.fvy * dt;
+      const fd = Math.pow(0.94, dt);
+      L.fvx *= fd; L.fvy *= fd;
+      L.swk += (1 - L.swk) * 0.02 * dt;
+      L.tilt += (clamp(L.fvx * 0.05, -0.4, 0.4) - L.tilt) * 0.1 * dt;
+      if (L.y < -L.s * 2 || L.x > W + 60 || L.x < -60) {
         Object.assign(L, makeLantern(false));
         lanterns.sort((a, b) => a.s - b.s);
       }
@@ -544,11 +563,81 @@
     if (reduceMotion) { t = 2; draw(); }
   }
 
-  // tap / click the sky to launch a cracker there
+  /* ---------- interaction: drag lanterns, tap the sky for crackers ---------- */
+  function canvasPos(cx, cy) {
+    const r = canvas.getBoundingClientRect();
+    return [cx - r.left, cy - r.top];
+  }
+  function lanternAt(x, y) {
+    for (let i = lanterns.length - 1; i >= 0; i--) { // front-most first
+      const L = lanterns[i];
+      const lx = L.x + Math.sin(t * L.sf + L.sp) * L.sa * L.swk;
+      if (Math.hypot(x - lx, y - L.y) < Math.max(L.s * 0.8, 26)) return L;
+    }
+    return null;
+  }
+  function grab(x, y) {
+    const L = lanternAt(x, y);
+    if (!L) return false;
+    L.x = L.x + Math.sin(t * L.sf + L.sp) * L.sa * L.swk; // absorb sway so it doesn't jump
+    L.swk = 0; L.held = true; L.fvx = L.fvy = L.dvx = L.dvy = 0;
+    L.ox = L.x - x; L.oy = L.y - y;
+    drag = { L, x, y, id: null };
+    canvas.style.cursor = 'grabbing';
+    return true;
+  }
+  function release() {
+    if (!drag) return;
+    const L = drag.L;
+    L.held = false;
+    L.fvx = clamp(L.dvx, -12, 12); L.fvy = clamp(L.dvy, -12, 12); // throw
+    drag = null;
+    suppressClick = true; setTimeout(() => { suppressClick = false; }, 60);
+    canvas.style.cursor = 'pointer';
+  }
+
+  if (!reduceMotion) {
+    // mouse
+    canvas.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      const [x, y] = canvasPos(e.clientX, e.clientY);
+      if (grab(x, y)) e.preventDefault();
+    });
+    window.addEventListener('mousemove', e => {
+      const [x, y] = canvasPos(e.clientX, e.clientY);
+      if (drag && drag.id === null) { drag.x = x; drag.y = y; }
+      else if (!drag && e.target === canvas) canvas.style.cursor = lanternAt(x, y) ? 'grab' : 'pointer';
+    });
+    window.addEventListener('mouseup', () => { if (drag && drag.id === null) release(); });
+
+    // touch — preventDefault only when a lantern is actually grabbed, so the page still scrolls elsewhere
+    canvas.addEventListener('touchstart', e => {
+      if (drag) return;
+      const tc = e.changedTouches[0];
+      const [x, y] = canvasPos(tc.clientX, tc.clientY);
+      if (grab(x, y)) { drag.id = tc.identifier; e.preventDefault(); }
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+      if (!drag || drag.id === null) return;
+      for (const tc of e.changedTouches) if (tc.identifier === drag.id) {
+        const [x, y] = canvasPos(tc.clientX, tc.clientY);
+        drag.x = x; drag.y = y; e.preventDefault();
+      }
+    }, { passive: false });
+    const touchDone = e => {
+      if (!drag || drag.id === null) return;
+      for (const tc of e.changedTouches) if (tc.identifier === drag.id) release();
+    };
+    canvas.addEventListener('touchend', touchDone);
+    canvas.addEventListener('touchcancel', touchDone);
+  }
+
+  // tap / click empty sky to launch a cracker there
   canvas.addEventListener('click', e => {
-    if (reduceMotion) return;
+    if (reduceMotion || suppressClick) return;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    if (lanternAt(x, y)) return;
     if (y > groundY - 40) return;
     launch(clamp(x + rand(-30, 30), 20, W - 20), y);
     if (rockets.length > 9) rockets.shift();
