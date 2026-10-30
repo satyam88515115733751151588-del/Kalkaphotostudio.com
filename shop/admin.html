@@ -61,10 +61,10 @@ function shell(){
 function products(){
  if(cur)return form();
  $("v").innerHTML='<div class="row" style="margin:0 0 14px"><button class="b" id="add">+ New product</button></div><div class="box" id="list">Loading…</div>';
- $("add").onclick=function(){cur={name:"",category:"Tees",price:"",compare_price:null,badge:"",sizes:[],sku:"",description:"",details:"",images:[],video_url:null,active:true};form()};
+ $("add").onclick=function(){cur={name:"",category:"Tees",price:"",size_prices:{},compare_price:null,badge:"",sizes:[],sku:"",description:"",details:"",images:[],video_url:null,active:true};form()};
  db.from("products").select("*").order("created_at",{ascending:false}).then(function(r){
   if(r.error)return $("list").innerHTML='<span class="err">'+esc(r.error.message)+'</span>';
-  var d=r.data;$("list").innerHTML=d.length?d.map(function(p){return '<div class="item"><img class="sq" src="'+esc(th(p.images[0]))+'" alt=""><div><b>'+esc(p.name)+'</b>'+(p.active?'':'<span class="tag">hidden</span>')+'<div class="m">₹'+p.price+(p.compare_price?' <s>₹'+p.compare_price+'</s>':'')+' · '+esc(p.category)+' · '+esc(p.sku||"no SKU")+'</div></div><button class="g" data-e="'+p.id+'">Edit</button><button class="g" data-h="'+p.id+'">'+(p.active?"Hide":"Show")+'</button><button class="g" data-x="'+p.id+'">Delete</button></div>'}).join(""):'<span class="m">No products yet. Click “New product”.</span>';
+  var d=r.data;$("list").innerHTML=d.length?d.map(function(p){return '<div class="item"><img class="sq" src="'+esc(th(p.images[0]))+'" alt=""><div><b>'+esc(p.name)+'</b>'+(p.active?'':'<span class="tag">hidden</span>')+'<div class="m">'+(function(){var v=(p.sizes||[]).map(function(z){var x=p.size_prices&&p.size_prices[z];return x==null?p.price:x}),a=Math.min.apply(null,v.length?v:[p.price]),b=Math.max.apply(null,v.length?v:[p.price]);return a==b?'₹'+a:'₹'+a+' – ₹'+b})()+(p.compare_price?' <s>₹'+p.compare_price+'</s>':'')+' · '+esc(p.category)+' · '+esc(p.sku||"no SKU")+'</div></div><button class="g" data-e="'+p.id+'">Edit</button><button class="g" data-h="'+p.id+'">'+(p.active?"Hide":"Show")+'</button><button class="g" data-x="'+p.id+'">Delete</button></div>'}).join(""):'<span class="m">No products yet. Click “New product”.</span>';
   $("list").onclick=function(e){var k=e.target.dataset,p;
    if(k.e){cur=d.filter(function(x){return x.id==k.e})[0];form()}
    if(k.h){p=d.filter(function(x){return x.id==k.h})[0];db.from("products").update({active:!p.active}).eq("id",p.id).then(products)}
@@ -73,11 +73,12 @@ function products(){
 }
 function fld(l,i,v,t){return '<label>'+l+'</label><input id="'+i+'" type="'+(t||"text")+'" value="'+esc(v)+'">'}
 function form(){
- var f=cur;
- $("v").innerHTML='<div class="box"><h2>'+(f.id?"Edit":"New")+' product</h2>'+fld("Name","n",f.name)+fld("Category (e.g. Tees, Hoodies)","c",f.category)+fld("Selling price (₹)","pr",f.price,"number")+fld("Original price shown crossed out (₹), optional","cp",f.compare_price==null?"":f.compare_price,"number")+fld("Badge on the product, optional (e.g. New Arrival)","bd",f.badge||"")+fld("Sizes, comma separated (leave blank if none)","sz",f.sizes.join(", "))+fld("Qikink SKU","sku",f.sku)+
+ var f=cur;SP={};Object.keys(f.size_prices||{}).forEach(function(k){SP[k]=f.size_prices[k]});
+ $("v").innerHTML='<div class="box"><h2>'+(f.id?"Edit":"New")+' product</h2>'+fld("Name","n",f.name)+fld("Category (e.g. Tees, Hoodies)","c",f.category)+fld("Selling price (₹), used for every size unless you set a size price below","pr",f.price,"number")+fld("Original price shown crossed out (₹), optional","cp",f.compare_price==null?"":f.compare_price,"number")+fld("Badge on the product, optional (e.g. New Arrival)","bd",f.badge||"")+fld("Sizes, comma separated (leave blank if none)","sz",f.sizes.join(", "))+'<div id="szp"></div>'+fld("Qikink SKU","sku",f.sku)+
  '<label>Description</label><textarea id="d" rows="3">'+esc(f.description)+'</textarea><label>Details (one per line, like Fabric: 180 GSM cotton)</label><textarea id="dt" rows="4">'+esc(f.details)+'</textarea><label>Images &amp; video (first image is the cover, second shows on hover)</label><div id="med"></div><input type="file" id="fl" multiple accept="image/*,video/*"><p class="m" id="um"></p>'+
  '<label class="ck"><input type="checkbox" id="ac" '+(f.active?"checked":"")+'> Visible on the store</label><div class="row"><button class="b" id="sv">Save product</button><button class="g" id="cn">Cancel</button></div><p class="m err" id="sm"></p></div>';
- media();
+ media();sizePrices();
+ $("sz").oninput=function(){keepSP();sizePrices()};$("pr").oninput=sizePrices;
  $("cn").onclick=function(){cur=null;products()};
  $("med").onclick=function(e){var k=e.target.dataset,i;
   if(k.c!==undefined){i=+k.c;f.images.unshift(f.images.splice(i,1)[0])}
@@ -89,15 +90,23 @@ function form(){
    up(file).then(function(r){r.video?f.video_url=r.url:f.images.push(r.url);media();next()}).catch(function(x){$("um").innerHTML='<span class="err">'+esc(x.message)+'</span>'})})()};
  $("sv").onclick=function(){
   f.name=$("n").value.trim();f.category=$("c").value.trim()||"General";f.price=parseInt($("pr").value,10);f.compare_price=$("cp").value.trim()===""?null:parseInt($("cp").value,10);f.badge=$("bd").value.trim()||null;f.sku=$("sku").value.trim();
-  f.sizes=$("sz").value.split(",").map(function(s){return s.trim()}).filter(Boolean);f.description=$("d").value.trim();f.details=$("dt").value.trim();f.active=$("ac").checked;
+  keepSP();f.sizes=sizeList();f.description=$("d").value.trim();f.details=$("dt").value.trim();f.active=$("ac").checked;
   if(!f.name||isNaN(f.price)||f.price<0)return $("sm").textContent="Name and a valid price are required.";
+  var bad=false;f.size_prices={};f.sizes.forEach(function(z){var x=SP[z];if(x===undefined||x==="")return;x=parseInt(x,10);if(isNaN(x)||x<0)bad=true;else f.size_prices[z]=x});
+  if(bad)return $("sm").textContent="Size prices must be whole numbers, or left blank.";
   if(f.compare_price!==null&&(isNaN(f.compare_price)||f.compare_price<=f.price))return $("sm").textContent="The original price must be higher than the selling price, or left blank.";
-  var row={name:f.name,category:f.category,price:f.price,compare_price:f.compare_price,badge:f.badge,sizes:f.sizes,sku:f.sku,description:f.description,details:f.details,images:f.images,video_url:f.video_url,active:f.active};
+  var row={name:f.name,category:f.category,price:f.price,size_prices:f.size_prices,compare_price:f.compare_price,badge:f.badge,sizes:f.sizes,sku:f.sku,description:f.description,details:f.details,images:f.images,video_url:f.video_url,active:f.active};
   $("sv").disabled=true;
   (f.id?db.from("products").update(row).eq("id",f.id):db.from("products").insert(row)).then(function(r){
    if(r.error){$("sv").disabled=false;return $("sm").textContent=r.error.message}cur=null;products()});
  };
 }
+var SP={};
+function sizeList(){return $("sz").value.split(",").map(function(s){return s.trim()}).filter(function(s,i,a){return s&&a.indexOf(s)==i})}
+function keepSP(){document.querySelectorAll("#szp input").forEach(function(i){SP[i.dataset.z]=i.value})}
+function sizePrices(){var z=sizeList(),box=$("szp");
+ if(z.length<2){box.innerHTML="";return}
+ box.innerHTML='<label>Price per size (₹), leave blank to use the selling price</label><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px">'+z.map(function(s){return '<div><div class="m" style="margin:0 0 4px">'+esc(s)+'</div><input type="number" min="0" data-z="'+esc(s)+'" placeholder="'+esc($("pr").value||"price")+'" value="'+esc(SP[s]==null?"":SP[s])+'"></div>'}).join("")+'</div>'}
 function media(){var f=cur;$("med").innerHTML=f.images.map(function(u,i){return '<div class="th"><img src="'+esc(th(u))+'" alt=""><span>'+(i?'<button data-c="'+i+'" title="Make cover">★</button>':'')+'<button data-r="'+i+'" title="Remove">✕</button></span></div>'}).join("")+(f.video_url?'<div class="th"><video src="'+esc(f.video_url)+'" muted></video><span><button data-v="1" title="Remove">✕</button></span></div>':"")}
 function up(file){var v=file.type.indexOf("video")==0,fd=new FormData();fd.append("file",file);fd.append("upload_preset",C.PRESET);
  return fetch("https://api.cloudinary.com/v1_1/"+C.CLOUD+"/"+(v?"video":"image")+"/upload",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){if(!j.secure_url)throw new Error((j.error&&j.error.message)||"Upload failed");return{url:j.secure_url,video:v}})}
