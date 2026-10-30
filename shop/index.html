@@ -128,7 +128,10 @@ var ORD=["XXS","XS","S","M","L","XL","XXL","XXXL"];
 var ICON={x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',play:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg>'};
 function save(){try{localStorage.setItem("cult_cart2",JSON.stringify(cart))}catch(e){}var n=cart.reduce(function(a,c){return a+c.q},0);$("cnt").textContent=n||""}
 function cats(){return P.map(function(p){return p.category}).filter(function(v,i,a){return a.indexOf(v)==i})}
-function priceHTML(p){var c=p.compare_price;return '<div class="pr"><b>'+rs(p.price)+'</b>'+(c&&c>p.price?'<s>'+rs(c)+'</s>':'')+'</div>'}
+function sp(p,s){var v=p.size_prices&&s?p.size_prices[s]:null;return v==null?p.price:v}
+function minP(p){return p.sizes.length?Math.min.apply(null,p.sizes.map(function(z){return sp(p,z)})):p.price}
+function maxP(p){return p.sizes.length?Math.max.apply(null,p.sizes.map(function(z){return sp(p,z)})):p.price}
+function priceHTML(p,s){var c=p.compare_price,list=s===undefined,v=list?minP(p):sp(p,s),from=list&&maxP(p)>v;return '<div class="pr"><b>'+(from?'From ':'')+rs(v)+'</b>'+(c&&c>v&&!from?'<s>'+rs(c)+'</s>':'')+'</div>'}
 
 /* ---------- header, menu, footer ---------- */
 function chrome(){
@@ -143,7 +146,7 @@ function isProd(){return /^#product-/.test(location.hash)}
 function list(){
  var l=P.filter(function(p){return cat=="All"||p.category==cat});
  if(fsz.length)l=l.filter(function(p){return p.sizes.some(function(z){return fsz.indexOf(z)>-1})});
- var f={lo:function(a,b){return a.price-b.price},hi:function(a,b){return b.price-a.price},az:function(a,b){return a.name.localeCompare(b.name)},za:function(a,b){return b.name.localeCompare(a.name)}}[srt];
+ var f={lo:function(a,b){return minP(a)-minP(b)},hi:function(a,b){return minP(b)-minP(a)},az:function(a,b){return a.name.localeCompare(b.name)},za:function(a,b){return b.name.localeCompare(a.name)}}[srt];
  return f?l.slice().sort(f):l;
 }
 function card(p){
@@ -171,7 +174,7 @@ function product(p){
  var facts=(p.details||"").split("\n").map(function(s){return s.trim()}).filter(Boolean).map(function(s){return '<li>'+esc(s)+'</li>'}).join("");
  var more=P.filter(function(x){return x.id!=p.id&&x.category==p.category}).concat(P.filter(function(x){return x.id!=p.id&&x.category!=p.category})).slice(0,4);
  $("view").innerHTML='<div class="wrap"><div class="pg"><div class="gal">'+ths+'<div class="mn">'+main+(p.badge?'<span class="bd">'+esc(p.badge)+'</span>':'')+'</div></div>'+
- '<div class="info"><h1>'+esc(p.name)+'</h1>'+priceHTML(p)+
+ '<div class="info"><h1>'+esc(p.name)+'</h1>'+priceHTML(p,sel)+
  (p.sizes.length?'<div class="lab">Size</div><div class="sz">'+p.sizes.map(function(z){return '<button class="chip '+(z==sel?"on":"")+'" data-p="'+p.id+'" data-s="'+esc(z)+'">'+esc(z)+'</button>'}).join("")+'</div>':'')+
  '<div class="acts"><button class="btn solid" data-add="'+p.id+'">Add to cart</button><button class="btn" data-buy="'+p.id+'">Buy it now</button></div>'+
  '<ul class="fx"><li><b>Payment</b><span>Cash on delivery</span></li><li><b>Delivery</b><span>5–8 working days · free above '+rs(S.free_above)+'</span></li></ul>'+
@@ -188,13 +191,13 @@ $("logo").onclick=function(e){e.preventDefault();if(location.hash){location.hash
 function keep(fn){var y=scrollY;fn();scrollTo(0,y)}
 
 /* ---------- cart ---------- */
-function totals(){var sub=cart.reduce(function(a,c){return a+byId(c.id).price*c.q},0),ship=!sub||sub>=S.free_above?0:S.shipping;return{sub:sub,ship:ship,cod:sub?S.cod_fee:0,total:sub?sub+ship+S.cod_fee:0}}
+function totals(){var sub=cart.reduce(function(a,c){return a+sp(byId(c.id),c.s)*c.q},0),ship=!sub||sub>=S.free_above?0:S.shipping;return{sub:sub,ship:ship,cod:sub?S.cod_fee:0,total:sub?sub+ship+S.cod_fee:0}}
 function sumHTML(t){return '<div class="sum"><div><span>Subtotal</span><span>'+rs(t.sub)+'</span></div><div><span>Shipping</span><span>'+(t.ship?rs(t.ship):"Free")+'</span></div><div><span>COD handling</span><span>'+rs(t.cod)+'</span></div><div class="tot"><span>Pay on delivery</span><span>'+rs(t.total)+'</span></div></div>'}
 function cartView(){
  var n=cart.reduce(function(a,c){return a+c.q},0);
  $("dTitle").textContent="Your cart"+(n?" ("+n+")":"");
  if(!cart.length){$("body").innerHTML='<div class="empty">Your cart is empty.<br><button class="btn auto" data-close>Continue shopping</button></div>';return}
- $("body").innerHTML=cart.map(function(c,i){var p=byId(c.id),im=p.images[0];return '<div class="line"><a class="t" href="#product-'+p.id+'" data-close>'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</a><div><a href="#product-'+p.id+'" data-close>'+esc(p.name)+'</a><small>'+(c.s?"Size "+esc(c.s):"One size")+'</small><div class="qty"><button data-q="'+i+'" data-d="-1" aria-label="Decrease">−</button><span>'+c.q+'</span><button data-q="'+i+'" data-d="1" aria-label="Increase">+</button></div> <button class="lnk" data-rm="'+i+'">Remove</button></div><div>'+rs(p.price*c.q)+'</div></div>'}).join("")+sumHTML(totals())+'<button class="btn solid" id="toCo">'+(user?"Checkout · Cash on delivery":"Sign in to checkout")+'</button>';
+ $("body").innerHTML=cart.map(function(c,i){var p=byId(c.id),im=p.images[0];return '<div class="line"><a class="t" href="#product-'+p.id+'" data-close>'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</a><div><a href="#product-'+p.id+'" data-close>'+esc(p.name)+'</a><small>'+(c.s?"Size "+esc(c.s):"One size")+'</small><div class="qty"><button data-q="'+i+'" data-d="-1" aria-label="Decrease">−</button><span>'+c.q+'</span><button data-q="'+i+'" data-d="1" aria-label="Increase">+</button></div> <button class="lnk" data-rm="'+i+'">Remove</button></div><div>'+rs(sp(p,c.s)*c.q)+'</div></div>'}).join("")+sumHTML(totals())+'<button class="btn solid" id="toCo">'+(user?"Checkout · Cash on delivery":"Sign in to checkout")+'</button>';
 }
 function checkoutView(){
  $("dTitle").textContent="Delivery details";
