@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Admin · The Indian CULT.</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f2ec;--s:#ece6dc;--ink:#1b1814;--mute:#6f675c;--ac:#a8741f;--sh:0 14px 32px -14px rgba(60,40,10,.3)}
+@media(prefers-color-scheme:dark){:root{--bg:#121110;--s:#1c1a17;--ink:#efe9de;--mute:#9a9183;--ac:#d4a24c;--sh:0 14px 32px -14px rgba(0,0,0,.7)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:300 15px/1.5 Inter,system-ui,sans-serif}
+h1,h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;margin:0 0 14px}h1 em{color:var(--ac)}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;box-shadow:var(--sh);border-radius:0 0 26px 26px;gap:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px}.tabs button,.g,.b{border-radius:99px;border:1px solid var(--ink);background:none;color:var(--ink);padding:9px 18px;font:inherit;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.tabs button.on,.b{background:var(--ink);color:var(--bg)}.g{border-color:transparent;color:var(--mute)}
+main{max-width:900px;margin:0 auto;padding:30px 5vw 80px}
+.box{background:var(--s);border-radius:28px;padding:24px;box-shadow:var(--sh);margin-bottom:20px}
+label{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
+input:not([type=checkbox]):not([type=file]),textarea,select{width:100%;background:var(--bg);color:var(--ink);border:1px solid transparent;border-radius:16px;padding:11px 14px;font:inherit;outline:0}
+input:focus,textarea:focus,select:focus{border-color:var(--ac)}
+.ck{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)}
+.row{display:flex;gap:10px;margin-top:18px;align-items:center;flex-wrap:wrap}
+.item{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--bg)}.item>div{flex:1;min-width:0}
+.sq{width:64px;height:64px;border-radius:24%;object-fit:cover;background:var(--bg);flex:none;box-shadow:var(--sh)}
+.m{color:var(--mute);font-size:13px;margin:6px 0 0}.err{color:#c0392b}
+#med{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.th{position:relative;width:96px;height:96px}.th img,.th video{width:96px;height:96px;object-fit:cover;border-radius:24%;box-shadow:var(--sh)}
+.th span{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+.th button{border:0;border-radius:50%;width:26px;height:26px;background:var(--bg);color:var(--ink);cursor:pointer;box-shadow:var(--sh)}
+.tag{display:inline-block;background:var(--bg);border-radius:99px;padding:2px 10px;font-size:11px;margin-left:6px}
+details{margin-top:6px}summary{cursor:pointer;color:var(--ac)}pre{white-space:pre-wrap;font:inherit;color:var(--mute);margin:8px 0}
+</style></head><body>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>if(!window.supabase||!window.CULT){document.write('<p style="font:16px system-ui;padding:30px;color:#c0392b">Could not load Supabase or config.js. Check that config.js is in the same folder as this page and that you are online.</p>')}</script>
+<script>
+var C=window.CULT,db=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_KEY),$=function(i){return document.getElementById(i)},app=$("app");
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var th=function(u){return u?u.replace("/upload/","/upload/c_fill,w_160,h_160,q_auto,f_auto/"):""};
+var ST=["new","confirmed","sent to Qikink","shipped","delivered","cancelled","returned"],cur=null,tab="products";
+db.auth.getSession().then(function(r){r.data.session?gate():login()});
+
+function login(){
+ app.innerHTML='<main style="max-width:420px"><div class="box"><h1>The Indian <em>CULT.</em></h1><p class="m">Admin sign in</p><label>Email</label><input id="e" type="email" autocomplete="username"><label>Password</label><input id="p" type="password" autocomplete="current-password"><div class="row"><button class="b" id="go">Sign in</button></div><p class="m err" id="m"></p></div></main>';
+ $("go").onclick=function(){db.auth.signInWithPassword({email:$("e").value.trim(),password:$("p").value}).then(function(r){r.error?$("m").textContent=r.error.message:gate()})};
+}
+// Customers also have accounts now, so only accounts listed in the "admins" table may use this page.
+function gate(){
+ db.rpc("is_admin").then(function(r){
+  if(r.data===true)return shell();
+  app.innerHTML='<main style="max-width:420px"><div class="box"><h1>Not an <em>admin</em></h1><p class="m">'+(r.error?esc(r.error.message):"This account does not have admin access. Customers sign in on the store, not here.")+'</p><div class="row"><button class="b" id="out2">Sign out</button></div></div></main>';
+  $("out2").onclick=function(){db.auth.signOut().then(login)};
+ });
+}
+function shell(){
+ app.innerHTML='<div class="top"><h1 style="margin:0">Admin · <em>CULT.</em></h1><div class="tabs">'+["products","orders","settings"].map(function(t){return '<button data-t="'+t+'" class="'+(t==tab?"on":"")+'">'+t+'</button>'}).join("")+'</div><button class="g" id="out">Sign out</button></div><main id="v"></main>';
+ app.querySelector(".tabs").onclick=function(e){if(e.target.dataset.t){tab=e.target.dataset.t;cur=null;shell()}};
+ $("out").onclick=function(){db.auth.signOut().then(login)};
+ ({products:products,orders:orders,settings:settings})[tab]();
+}
+
+// ---------- products ----------
+function products(){
+ if(cur)return form();
+ $("v").innerHTML='<div class="row" style="margin:0 0 14px"><button class="b" id="add">+ New product</button></div><div class="box" id="list">Loading…</div>';
+ $("add").onclick=function(){cur={name:"",category:"Tees",price:"",compare_price:null,badge:"",sizes:[],sku:"",description:"",details:"",images:[],video_url:null,active:true};form()};
+ db.from("products").select("*").order("created_at",{ascending:false}).then(function(r){
+  if(r.error)return $("list").innerHTML='<span class="err">'+esc(r.error.message)+'</span>';
+  var d=r.data;$("list").innerHTML=d.length?d.map(function(p){return '<div class="item"><img class="sq" src="'+esc(th(p.images[0]))+'" alt=""><div><b>'+esc(p.name)+'</b>'+(p.active?'':'<span class="tag">hidden</span>')+'<div class="m">₹'+p.price+(p.compare_price?' <s>₹'+p.compare_price+'</s>':'')+' · '+esc(p.category)+' · '+esc(p.sku||"no SKU")+'</div></div><button class="g" data-e="'+p.id+'">Edit</button><button class="g" data-h="'+p.id+'">'+(p.active?"Hide":"Show")+'</button><button class="g" data-x="'+p.id+'">Delete</button></div>'}).join(""):'<span class="m">No products yet. Click “New product”.</span>';
+  $("list").onclick=function(e){var k=e.target.dataset,p;
+   if(k.e){cur=d.filter(function(x){return x.id==k.e})[0];form()}
+   if(k.h){p=d.filter(function(x){return x.id==k.h})[0];db.from("products").update({active:!p.active}).eq("id",p.id).then(products)}
+   if(k.x&&confirm("Delete this product permanently?"))db.from("products").delete().eq("id",k.x).then(products)};
+ });
+}
+function fld(l,i,v,t){return '<label>'+l+'</label><input id="'+i+'" type="'+(t||"text")+'" value="'+esc(v)+'">'}
+function form(){
+ var f=cur;
+ $("v").innerHTML='<div class="box"><h2>'+(f.id?"Edit":"New")+' product</h2>'+fld("Name","n",f.name)+fld("Category (e.g. Tees, Hoodies)","c",f.category)+fld("Selling price (₹)","pr",f.price,"number")+fld("Original price shown crossed out (₹), optional","cp",f.compare_price==null?"":f.compare_price,"number")+fld("Badge on the product, optional (e.g. New Arrival)","bd",f.badge||"")+fld("Sizes, comma separated (leave blank if none)","sz",f.sizes.join(", "))+fld("Qikink SKU","sku",f.sku)+
+ '<label>Description</label><textarea id="d" rows="3">'+esc(f.description)+'</textarea><label>Details (one per line, like Fabric: 180 GSM cotton)</label><textarea id="dt" rows="4">'+esc(f.details)+'</textarea><label>Images &amp; video (first image is the cover, second shows on hover)</label><div id="med"></div><input type="file" id="fl" multiple accept="image/*,video/*"><p class="m" id="um"></p>'+
+ '<label class="ck"><input type="checkbox" id="ac" '+(f.active?"checked":"")+'> Visible on the store</label><div class="row"><button class="b" id="sv">Save product</button><button class="g" id="cn">Cancel</button></div><p class="m err" id="sm"></p></div>';
+ media();
+ $("cn").onclick=function(){cur=null;products()};
+ $("med").onclick=function(e){var k=e.target.dataset,i;
+  if(k.c!==undefined){i=+k.c;f.images.unshift(f.images.splice(i,1)[0])}
+  if(k.r!==undefined)f.images.splice(+k.r,1);
+  if(k.v)f.video_url=null;media()};
+ $("fl").onchange=function(){var fs=Array.prototype.slice.call(this.files),n=0;this.value="";
+  (function next(){if(!fs.length){$("um").textContent="";return media()}
+   var file=fs.shift();$("um").textContent="Uploading "+(++n)+"…";
+   up(file).then(function(r){r.video?f.video_url=r.url:f.images.push(r.url);media();next()}).catch(function(x){$("um").innerHTML='<span class="err">'+esc(x.message)+'</span>'})})()};
+ $("sv").onclick=function(){
+  f.name=$("n").value.trim();f.category=$("c").value.trim()||"General";f.price=parseInt($("pr").value,10);f.compare_price=$("cp").value.trim()===""?null:parseInt($("cp").value,10);f.badge=$("bd").value.trim()||null;f.sku=$("sku").value.trim();
+  f.sizes=$("sz").value.split(",").map(function(s){return s.trim()}).filter(Boolean);f.description=$("d").value.trim();f.details=$("dt").value.trim();f.active=$("ac").checked;
+  if(!f.name||isNaN(f.price)||f.price<0)return $("sm").textContent="Name and a valid price are required.";
+  if(f.compare_price!==null&&(isNaN(f.compare_price)||f.compare_price<=f.price))return $("sm").textContent="The original price must be higher than the selling price, or left blank.";
+  var row={name:f.name,category:f.category,price:f.price,compare_price:f.compare_price,badge:f.badge,sizes:f.sizes,sku:f.sku,description:f.description,details:f.details,images:f.images,video_url:f.video_url,active:f.active};
+  $("sv").disabled=true;
+  (f.id?db.from("products").update(row).eq("id",f.id):db.from("products").insert(row)).then(function(r){
+   if(r.error){$("sv").disabled=false;return $("sm").textContent=r.error.message}cur=null;products()});
+ };
+}
+function media(){var f=cur;$("med").innerHTML=f.images.map(function(u,i){return '<div class="th"><img src="'+esc(th(u))+'" alt=""><span>'+(i?'<button data-c="'+i+'" title="Make cover">★</button>':'')+'<button data-r="'+i+'" title="Remove">✕</button></span></div>'}).join("")+(f.video_url?'<div class="th"><video src="'+esc(f.video_url)+'" muted></video><span><button data-v="1" title="Remove">✕</button></span></div>':"")}
+function up(file){var v=file.type.indexOf("video")==0,fd=new FormData();fd.append("file",file);fd.append("upload_preset",C.PRESET);
+ return fetch("https://api.cloudinary.com/v1_1/"+C.CLOUD+"/"+(v?"video":"image")+"/upload",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){if(!j.secure_url)throw new Error((j.error&&j.error.message)||"Upload failed");return{url:j.secure_url,video:v}})}
+
+// ---------- orders ----------
+function orders(){
+ $("v").innerHTML='<div class="box" id="list">Loading…</div>';
+ db.from("orders").select("*").order("created_at",{ascending:false}).limit(200).then(function(r){
+  if(r.error)return $("list").innerHTML='<span class="err">'+esc(r.error.message)+'</span>';
+  var d=r.data;$("list").innerHTML=d.length?d.map(function(o){
+   var items=o.items.map(function(i){return i.name+(i.size?" ("+i.size+")":"")+" × "+i.qty+"  ["+(i.sku||"no SKU")+"]"}).join("\n");
+   var txt=o.order_no+"\n"+items+"\nCOD to collect: ₹"+o.total+"\n"+o.name+" · "+o.phone+"\n"+o.address+", "+o.city+", "+o.state+" - "+o.pincode;
+   return '<div class="item" style="align-items:flex-start"><div><b>'+esc(o.order_no)+'</b> · ₹'+o.total+' COD<div class="m">'+esc(o.name)+' · '+esc(o.phone)+' · '+new Date(o.created_at).toLocaleString("en-IN")+'</div><details><summary>Details</summary><pre>'+esc(txt)+'</pre><button class="g" data-cp="'+esc(o.id)+'">Copy</button><a class="g" style="text-decoration:none;padding:9px 18px" target="_blank" rel="noopener" href="https://wa.me/91'+esc(o.phone)+'?text='+encodeURIComponent("Hi "+o.name+", confirming your order "+o.order_no+" (₹"+o.total+" cash on delivery). Reply YES to confirm.")+'">WhatsApp customer</a></details></div><select data-s="'+o.id+'" style="width:auto">'+ST.map(function(s){return '<option'+(s==o.status?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div>'}).join(""):'<span class="m">No orders yet.</span>';
+   $("list").onchange=function(e){if(e.target.dataset.s)db.from("orders").update({status:e.target.value}).eq("id",e.target.dataset.s).then(function(r){if(r.error)alert(r.error.message)})};
+   $("list").onclick=function(e){var id=e.target.dataset.cp;if(id){navigator.clipboard.writeText(e.target.parentNode.querySelector("pre").textContent);e.target.textContent="Copied"}};
+ });
+}
+
+// ---------- settings ----------
+function settings(){
+ $("v").innerHTML='<div class="box" id="list">Loading…</div>';
+ db.from("settings").select("*").eq("id",1).single().then(function(r){var s=r.data||{};
+  $("list").innerHTML='<h2>Store settings</h2>'+fld("COD handling fee (₹)","cf",s.cod_fee,"number")+fld("Shipping charge (₹)","sh",s.shipping,"number")+fld("Free shipping above (₹)","fa",s.free_above,"number")+fld("WhatsApp number for order confirmations (with 91, no +)","wa",s.whatsapp)+'<div class="row"><button class="b" id="ss">Save</button></div><p class="m" id="sm"></p>';
+  $("ss").onclick=function(){db.from("settings").update({cod_fee:+$("cf").value,shipping:+$("sh").value,free_above:+$("fa").value,whatsapp:$("wa").value.trim()}).eq("id",1).then(function(r){$("sm").textContent=r.error?r.error.message:"Saved."})};
+ });
+}
+</script></body></html>
