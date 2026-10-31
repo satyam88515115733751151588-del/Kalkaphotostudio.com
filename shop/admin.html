@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; media-src https://res.cloudinary.com; connect-src 'self' https://adisludphpflvmoajeif.supabase.co wss://adisludphpflvmoajeif.supabase.co https://api.cloudinary.com; object-src 'none'; base-uri 'none'; form-action 'self'">
 <title>Admin · The Meme Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -29,6 +30,14 @@ input:focus,textarea:focus,select:focus{border-color:var(--b);box-shadow:0 0 0 3
 .th button{border:2px solid var(--ink);border-radius:50%;width:26px;height:26px;background:#fff;color:var(--ink);cursor:pointer;font-weight:800;padding:0}
 .tag{display:inline-block;background:var(--y);border:2px solid var(--ink);border-radius:99px;padding:0 10px;font-size:11px;font-weight:700;margin-left:6px}
 details{margin-top:6px}summary{cursor:pointer;color:var(--b);font-weight:700}pre{white-space:pre-wrap;font:inherit;color:var(--mute);margin:8px 0}
+
+.item{flex-wrap:wrap}.item>div{min-width:140px}.item>.act{flex:none;min-width:0;display:flex;gap:2px;flex-wrap:wrap}
+.item input[type=checkbox]{width:20px;height:20px;flex:none;accent-color:var(--b)}
+.item.gr{background:#F3F6FF;border-radius:16px;padding-left:10px;padding-right:10px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);vertical-align:-1px;margin-right:5px}
+.gb{position:sticky;top:8px;z-index:5;background:var(--y);border:2px solid var(--ink);border-radius:18px;padding:10px 16px;margin-bottom:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;box-shadow:0 3px 0 var(--ink)}
+.gb .g{border-color:var(--ink);background:#fff}
+input.cp{width:56px!important;height:42px;padding:2px!important;border-radius:12px!important;cursor:pointer;flex:none}
 </style></head><body>
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
@@ -38,7 +47,7 @@ details{margin-top:6px}summary{cursor:pointer;color:var(--b);font-weight:700}pre
 var C=window.CULT,db=supabase.createClient(C.SUPABASE_URL,C.SUPABASE_KEY),$=function(i){return document.getElementById(i)},app=$("app");
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 var th=function(u){return u?u.replace("/upload/","/upload/c_fill,w_160,h_160,q_auto,f_auto/"):""};
-var ST=["new","confirmed","sent to Qikink","shipped","delivered","cancelled","returned"],cur=null,tab="products";
+var ST=["new","confirmed","sent to Qikink","shipped","delivered","cancelled","returned"],cur=null,grp=null,sel={},tab="products";
 db.auth.getSession().then(function(r){r.data.session?gate():login()});
 
 function login(){
@@ -55,32 +64,109 @@ function gate(){
 }
 function shell(){
  app.innerHTML='<div class="top"><h1 style="margin:0">Admin · <em>Meme Shop</em></h1><div class="tabs">'+["products","orders","settings"].map(function(t){return '<button data-t="'+t+'" class="'+(t==tab?"on":"")+'">'+t+'</button>'}).join("")+'</div><button class="g" id="out">Sign out</button></div><main id="v"></main>';
- app.querySelector(".tabs").onclick=function(e){if(e.target.dataset.t){tab=e.target.dataset.t;cur=null;shell()}};
+ app.querySelector(".tabs").onclick=function(e){if(e.target.dataset.t){tab=e.target.dataset.t;cur=null;grp=null;sel={};shell()}};
  $("out").onclick=function(){db.auth.signOut().then(login)};
  ({products:products,orders:orders,settings:settings})[tab]();
 }
 
 // ---------- products ----------
+function uuid(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){var r=Math.random()*16|0;return (c=="x"?r:(r&3|8)).toString(16)})}
+var COL={"black":"#111111","white":"#ffffff","off white":"#f5f0e1","cream":"#f5f0e1","ivory":"#f5f0e1","beige":"#e8dcc0","brown":"#6d4c41","grey":"#9e9e9e","gray":"#9e9e9e","charcoal":"#36454f","red":"#e53935","maroon":"#7b1e2b","pink":"#ff7ac6","orange":"#ff9f1c","yellow":"#ffd60a","mustard":"#e1ad01","green":"#12c47b","olive":"#6b6b2a","mint":"#9be7c4","teal":"#0f8b8d","blue":"#2f5bff","royal blue":"#2f5bff","sky blue":"#87ceeb","navy":"#1f2a52","navy blue":"#1f2a52","purple":"#7b3fe4","lavender":"#c9b8f0"};
+function guess(n){return COL[String(n||"").trim().toLowerCase()]||null}
+function okHex(h){return /^#[0-9a-fA-F]{6}$/.test(h||"")?h.toLowerCase():null}
+function dotTag(p){return p.color?'<span class="tag">'+(okHex(p.color_hex)?'<i class="dot" style="background:'+okHex(p.color_hex)+'"></i>':'')+esc(p.color)+'</span>':''}
+function wire(ni,pi){var n=$(ni),p=$(pi);if(!n||!p)return;p.onchange=function(){p._t=1};n.oninput=function(){var c=guess(n.value);if(c&&!p._t)p.value=c}}
+function done(r){if(r&&r.error)alert(r.error.message);products()}
 function products(){
- if(cur)return form();
- $("v").innerHTML='<div class="row" style="margin:0 0 14px"><button class="b" id="add">+ New product</button></div><div class="box" id="list">Loading…</div>';
- $("add").onclick=function(){cur={name:"",category:"Tees",price:"",compare_price:null,badge:"",sizes:[],sku:"",description:"",details:"",images:[],video_url:null,active:true};form()};
+ if(cur)return form();if(grp)return gform();
+ $("v").innerHTML='<div class="row" style="margin:0 0 14px"><button class="b" id="add">+ New product</button></div><div id="gb"></div><div class="box" id="list">Loading…</div>';
+ $("add").onclick=function(){cur={name:"",category:"Tees",price:"",compare_price:null,size_prices:{},badge:"",sizes:[],sku:"",description:"",details:"",images:[],video_url:null,active:true,group_id:null,color:null,color_hex:null};form()};
  db.from("products").select("*").order("created_at",{ascending:false}).then(function(r){
   if(r.error)return $("list").innerHTML='<span class="err">'+esc(r.error.message)+'</span>';
-  var d=r.data;$("list").innerHTML=d.length?d.map(function(p){return '<div class="item"><img class="sq" src="'+esc(th(p.images[0]))+'" alt=""><div><b>'+esc(p.name)+'</b>'+(p.active?'':'<span class="tag">hidden</span>')+'<div class="m">₹'+p.price+(p.compare_price?' <s>₹'+p.compare_price+'</s>':'')+' · '+esc(p.category)+' · '+esc(p.sku||"no SKU")+'</div></div><button class="g" data-e="'+p.id+'">Edit</button><button class="g" data-h="'+p.id+'">'+(p.active?"Hide":"Show")+'</button><button class="g" data-x="'+p.id+'">Delete</button></div>'}).join(""):'<span class="m">No products yet. Click “New product”.</span>';
+  var d=r.data,seen={},ord=[],cnt={},prev=null;
+  Object.keys(sel).forEach(function(k){if(!d.some(function(x){return x.id==k}))delete sel[k]});
+  d.forEach(function(p){if(p.group_id)cnt[p.group_id]=(cnt[p.group_id]||0)+1});
+  d.forEach(function(p){if(!p.group_id){ord.push(p);return}if(seen[p.group_id])return;seen[p.group_id]=1;d.filter(function(x){return x.group_id==p.group_id}).reverse().forEach(function(x){ord.push(x)})});
+  var gbar=function(){var n=Object.keys(sel).length;$("gb").innerHTML=n?'<div class="gb"><b>'+n+' selected</b>'+(n>1?'<button class="b" id="mk">Group into one catalogue</button>':'<span class="m" style="margin:0">Tick one more to group them as colours.</span>')+'<button class="g" id="cs">Clear</button></div>':''};
+  $("list").innerHTML=ord.length?ord.map(function(p){
+   var h="",multi=p.group_id&&cnt[p.group_id]>1;
+   if(multi&&p.group_id!=prev)h='<div class="m" style="margin:16px 0 0"><b>Catalogue</b> · '+cnt[p.group_id]+' colours</div>';
+   prev=p.group_id||null;
+   return h+'<div class="item'+(multi?' gr':'')+'"><input type="checkbox" data-k="'+p.id+'"'+(sel[p.id]?' checked':'')+' aria-label="Select"><img class="sq" src="'+esc(th(p.images[0]))+'" alt=""><div><b>'+esc(p.name)+'</b>'+dotTag(p)+(p.active?'':'<span class="tag">hidden</span>')+'<div class="m">₹'+p.price+(p.compare_price?' <s>₹'+p.compare_price+'</s>':'')+' · '+esc(p.category)+' · '+esc(p.sku||"no SKU")+'</div></div><div class="act"><button class="g" data-e="'+p.id+'">Edit</button><button class="g" data-ac="'+p.id+'">+ Colour</button><button class="g" data-mg="'+p.id+'">Make colour of…</button>'+(p.group_id?'<button class="g" data-ug="'+p.id+'">Ungroup</button>':'')+'<button class="g" data-h="'+p.id+'">'+(p.active?"Hide":"Show")+'</button><button class="g" data-x="'+p.id+'">Delete</button></div></div>'}).join(""):'<span class="m">No products yet. Click “New product”.</span>';
+  gbar();
+  $("list").onchange=function(e){var k=e.target.dataset.k;if(k){e.target.checked?sel[k]=1:delete sel[k];gbar()}};
+  $("gb").onclick=function(e){
+   if(e.target.id=="cs"){sel={};products()}
+   if(e.target.id=="mk"){grp={items:d.filter(function(x){return sel[x.id]})};gform()}};
   $("list").onclick=function(e){var k=e.target.dataset,p;
    if(k.e){cur=d.filter(function(x){return x.id==k.e})[0];form()}
-   if(k.h){p=d.filter(function(x){return x.id==k.h})[0];db.from("products").update({active:!p.active}).eq("id",p.id).then(products)}
-   if(k.x&&confirm("Delete this product permanently?"))db.from("products").delete().eq("id",k.x).then(products)};
+   if(k.mg){mform(d.filter(function(x){return x.id==k.mg})[0],d);return}
+   if(k.ac){p=d.filter(function(x){return x.id==k.ac})[0];
+    cur={name:p.name,category:p.category,price:p.price,compare_price:p.compare_price,size_prices:Object.assign({},p.size_prices||{}),badge:p.badge||"",sizes:p.sizes.slice(),sku:"",description:p.description,details:p.details,images:[],video_url:null,active:true,group_id:p.group_id||uuid(),color:"",color_hex:"#cccccc",_orig:p.color?null:{id:p.id,name:p.name}};form()}
+   if(k.ug&&confirm("Take this out of its catalogue? It becomes a normal single product again."))db.from("products").update({group_id:null,color:null,color_hex:null}).eq("id",k.ug).then(done);
+   if(k.h){p=d.filter(function(x){return x.id==k.h})[0];db.from("products").update({active:!p.active}).eq("id",p.id).then(done)}
+   if(k.x&&confirm("Delete this product permanently?"))db.from("products").delete().eq("id",k.x).then(done)};
  });
+}
+// Turn several existing products into one colour catalogue
+function gform(){
+ var it=grp.items;
+ $("v").innerHTML='<div class="box"><h2>Group into one catalogue</h2><p class="m" style="margin:0">Customers will see <b>one</b> product with colour choices. Each colour keeps its own photos, sizes, SKU and price.</p>'+fld("Catalogue name (applied to all of them)","gn",it[0].name)+'<label>Colour of each product</label>'+
+ it.map(function(p,i){var hx=okHex(p.color_hex)||guess(p.color)||"#cccccc";return '<div class="item"><img class="sq" src="'+esc(th(p.images[0]))+'" alt=""><div><b>'+esc(p.name)+'</b><div class="m">₹'+p.price+' · '+esc(p.sku||"no SKU")+'</div><input id="gc'+i+'" placeholder="Colour name, e.g. Black" value="'+esc(p.color||"")+'" style="margin-top:8px"></div><input class="cp" type="color" id="gh'+i+'" value="'+hx+'"></div>'}).join("")+
+ '<div class="row"><button class="b" id="gs">Create catalogue</button><button class="g" id="gx">Cancel</button></div><p class="m err" id="gm"></p></div>';
+ it.forEach(function(p,i){wire("gc"+i,"gh"+i);if(okHex(p.color_hex))$("gh"+i)._t=1});
+ $("gx").onclick=function(){grp=null;products()};
+ $("gs").onclick=function(){
+  var name=$("gn").value.trim(),cs=it.map(function(p,i){return $("gc"+i).value.trim()}),low=cs.map(function(c){return c.toLowerCase()}),m=function(t){$("gm").textContent=t};
+  if(!name)return m("Enter a catalogue name.");
+  if(cs.some(function(c){return !c}))return m("Every product needs a colour name.");
+  if(low.some(function(c,i){return low.indexOf(c)!=i}))return m("Two products have the same colour name.");
+  $("gs").disabled=true;
+  db.rpc("group_products",{p_name:name,p_products:it.map(function(p,i){return{id:p.id,color:cs[i],color_hex:$("gh"+i).value}})}).then(function(r){
+   if(r.error)throw r.error;grp=null;sel={};products();
+  }).catch(function(x){$("gs").disabled=false;m(x.message||"Could not save catalogue.")});
+ };
+}
+// Merge one existing product into another existing article (or catalogue) as a colour option
+function mform(p,d){
+ var seen={},opts=[];
+ d.forEach(function(x){if(x.id==p.id||(x.group_id&&x.group_id==p.group_id))return;var k=x.group_id||x.id;if(seen[k])return;seen[k]=1;opts.push({t:x,m:x.group_id?d.filter(function(y){return y.group_id==x.group_id}):[x]})});
+ if(!opts.length){alert("There is no other product to merge with.");return products()}
+ $("v").innerHTML='<div class="box"><h2>Make “'+esc(p.name)+'” a colour of another article</h2><p class="m" style="margin:0">Customers will then see ONE article with colour choices. This product keeps its own photos, sizes, price and SKU, and takes the other article’s name.</p><label>Merge into</label><select id="mt">'+opts.map(function(o,i){return '<option value="'+i+'">'+esc(o.t.name)+(o.m.length>1?" (catalogue, "+o.m.length+" colours)":o.t.color?" – "+esc(o.t.color):"")+"</option>"}).join("")+'</select><div id="mx"></div><div class="row"><button class="b" id="ms">Merge</button><button class="g" id="mx2">Cancel</button></div><p class="m err" id="mm"></p></div>';
+ var draw=function(){var o=opts[+$("mt").value],tg=o.t,grouped=!!tg.group_id,hx=okHex(p.color_hex)||guess(p.color)||"#cccccc",hy=okHex(tg.color_hex)||guess(tg.color)||"#cccccc";
+  $("mx").innerHTML=(grouped?'<p class="m">Existing colours: <b>'+esc(o.m.map(function(y){return y.color||"?"}).join(", "))+'</b></p>':fld("Colour of “"+esc(tg.name)+"” (the existing article)","tc",tg.color||"")+'<label>Its swatch colour</label><input class="cp" type="color" id="tch" value="'+hy+'">')+fld("Colour of “"+esc(p.name)+"” (this product)","mc",p.color||"")+'<label>Its swatch colour</label><input class="cp" type="color" id="mh" value="'+hx+'">';
+  if(!grouped){wire("tc","tch");if(okHex(tg.color_hex))$("tch")._t=1}
+  wire("mc","mh");if(okHex(p.color_hex))$("mh")._t=1};
+ $("mt").onchange=draw;draw();
+ $("mx2").onclick=function(){products()};
+ $("ms").onclick=function(){
+  var o=opts[+$("mt").value],tg=o.t,mc=$("mc").value.trim(),m=function(t){$("mm").textContent=t},fail=function(t){$("ms").disabled=false;m(t)};
+  if(!mc)return m("Give this product a colour name.");
+  $("ms").disabled=true;
+  if(tg.group_id){
+   if(o.m.some(function(y){return (y.color||"").toLowerCase()==mc.toLowerCase()}))return fail("That colour already exists in this catalogue.");
+   db.from("products").update({name:tg.name,category:tg.category,group_id:tg.group_id,color:mc,color_hex:$("mh").value}).eq("id",p.id).select().then(function(r){
+    if(r.error)return fail(r.error.message);if(!r.data.length)return fail("Blocked. Re-run supabase-setup.sql.");sel={};products()});
+  }else{
+   var tc=$("tc").value.trim();
+   if(!tc)return fail("Also enter the colour of the existing “"+tg.name+"”.");
+   if(tc.toLowerCase()==mc.toLowerCase())return fail("The two colours need different names.");
+   db.rpc("group_products",{p_name:tg.name,p_products:[{id:tg.id,color:tc,color_hex:$("tch").value},{id:p.id,color:mc,color_hex:$("mh").value}]}).then(function(r){
+    if(r.error)return fail(r.error.message+" (If it says the function does not exist, re-run supabase-setup.sql.)");sel={};products()});
+  }};
 }
 function fld(l,i,v,t){return '<label>'+l+'</label><input id="'+i+'" type="'+(t||"text")+'" value="'+esc(v)+'">'}
 function form(){
- var f=cur;
- $("v").innerHTML='<div class="box"><h2>'+(f.id?"Edit":"New")+' product</h2>'+fld("Name","n",f.name)+fld("Category (e.g. Tees, Hoodies)","c",f.category)+fld("Selling price (₹)","pr",f.price,"number")+fld("Original price shown crossed out (₹), optional","cp",f.compare_price==null?"":f.compare_price,"number")+fld("Badge on the product, optional (e.g. New Arrival)","bd",f.badge||"")+fld("Sizes, comma separated (leave blank if none)","sz",f.sizes.join(", "))+fld("Qikink SKU","sku",f.sku)+
+ var f=cur,g=!!f.group_id,o=f._orig,hx=okHex(f.color_hex)||guess(f.color)||"#cccccc";
+ $("v").innerHTML='<div class="box"><h2>'+(f.id?"Edit":"New")+' product'+(g?' <span class="tag">colour of a catalogue</span>':'')+'</h2>'+fld("Name","n",f.name)+
+ (g?fld("Colour name for this one (e.g. Black)","col",f.color||"")+'<label>Swatch colour customers will see</label><input class="cp" type="color" id="colh" value="'+hx+'">':'<p class="m">Single product. To sell it in several colours press “+ Colour” next to it in the list, or tick products there and group them.</p>')+
+ (o?'<div style="margin-top:16px;padding:14px;border:2px dashed var(--ink);border-radius:16px;background:#FFFBE0"><b>What colour is the existing “'+esc(o.name)+'”?</b><p class="m" style="margin:2px 0 0">It becomes the first colour of this catalogue.</p>'+fld("Its colour name","oc","")+'<label>Its swatch colour</label><input class="cp" type="color" id="och" value="#cccccc"></div>':'')+
+ fld("Category (e.g. Tees, Hoodies)","c",f.category)+fld("Selling price (₹)","pr",f.price,"number")+fld("Original price shown crossed out (₹), optional","cp",f.compare_price==null?"":f.compare_price,"number")+fld("Badge on the product, optional (e.g. New Arrival)","bd",f.badge||"")+fld("Sizes, comma separated (leave blank if none)","sz",f.sizes.join(", "))+'<label>Different price for each size (optional)</label><textarea id="szp" rows="4" placeholder="S: 499&#10;M: 549&#10;L: 599">'+esc(Object.keys(f.size_prices||{}).map(function(k){return k+": "+f.size_prices[k]}).join("\n"))+'</textarea><p class="m">Enter one size and price per line. Any size left out uses the main selling price above.</p>'+fld("Qikink SKU","sku",f.sku)+
  '<label>Description</label><textarea id="d" rows="3">'+esc(f.description)+'</textarea><label>Details (one per line, like Fabric: 180 GSM cotton)</label><textarea id="dt" rows="4">'+esc(f.details)+'</textarea><label>Images &amp; video (first image is the cover, second shows on hover)</label><div id="med"></div><input type="file" id="fl" multiple accept="image/*,video/*"><p class="m" id="um"></p>'+
- '<label class="ck"><input type="checkbox" id="ac" '+(f.active?"checked":"")+'> Visible on the store</label><div class="row"><button class="b" id="sv">Save product</button><button class="g" id="cn">Cancel</button></div><p class="m err" id="sm"></p></div>';
- media();
+ '<label class="ck"><input type="checkbox" id="ac" '+(f.active?"checked":"")+'> Visible on the store</label>'+
+ (g?'<label class="ck" style="margin-top:14px"><input type="checkbox" id="shr" checked> Apply name, category, prices, badge, description &amp; details to every colour in this catalogue</label>':'')+
+ '<div class="row"><button class="b" id="sv">Save product</button><button class="g" id="cn">Cancel</button></div><p class="m err" id="sm"></p></div>';
+ media();wire("col","colh");wire("oc","och");if($("colh")&&okHex(f.color_hex))$("colh")._t=1;
  $("cn").onclick=function(){cur=null;products()};
  $("med").onclick=function(e){var k=e.target.dataset,i;
   if(k.c!==undefined){i=+k.c;f.images.unshift(f.images.splice(i,1)[0])}
@@ -91,14 +177,31 @@ function form(){
    var file=fs.shift();$("um").textContent="Uploading "+(++n)+"…";
    up(file).then(function(r){r.video?f.video_url=r.url:f.images.push(r.url);media();next()}).catch(function(x){$("um").innerHTML='<span class="err">'+esc(x.message)+'</span>'})})()};
  $("sv").onclick=function(){
-  f.name=$("n").value.trim();f.category=$("c").value.trim()||"General";f.price=parseInt($("pr").value,10);f.compare_price=$("cp").value.trim()===""?null:parseInt($("cp").value,10);f.badge=$("bd").value.trim()||null;f.sku=$("sku").value.trim();
+  var er=function(t){$("sm").textContent=t};
+  f.name=$("n").value.trim();f.category=$("c").value.trim()||"General";f.price=Number($("pr").value);f.compare_price=$("cp").value.trim()===""?null:Number($("cp").value);f.badge=$("bd").value.trim()||null;f.sku=$("sku").value.trim()||null;
   f.sizes=$("sz").value.split(",").map(function(s){return s.trim()}).filter(Boolean);f.description=$("d").value.trim();f.details=$("dt").value.trim();f.active=$("ac").checked;
-  if(!f.name||isNaN(f.price)||f.price<0)return $("sm").textContent="Name and a valid price are required.";
-  if(f.compare_price!==null&&(isNaN(f.compare_price)||f.compare_price<=f.price))return $("sm").textContent="The original price must be higher than the selling price, or left blank.";
-  var row={name:f.name,category:f.category,price:f.price,compare_price:f.compare_price,badge:f.badge,sizes:f.sizes,sku:f.sku,description:f.description,details:f.details,images:f.images,video_url:f.video_url,active:f.active};
+  if(!f.name||!$("pr").value.trim()||!Number.isSafeInteger(f.price)||f.price<0)return er("Name and a valid whole-number price are required.");
+  var sp={},rawPrices=$("szp").value.trim(),badPrice=false;
+  if(rawPrices)rawPrices.split(/\r?\n/).forEach(function(line){var m=line.match(/^\s*(.+?)\s*:\s*(\d+)\s*$/);if(!m){badPrice=true;return}var z=m[1].trim(),v=Number(m[2]);if(!z||f.sizes.indexOf(z)<0||Object.prototype.hasOwnProperty.call(sp,z)||!Number.isSafeInteger(v)||v<0){badPrice=true;return}sp[z]=v});
+  if(badPrice)return er("Check size prices: use one existing size per line, like M: 549, with no duplicates.");
+  f.size_prices=sp;
+  var highest=Object.keys(sp).reduce(function(a,k){return Math.max(a,sp[k])},f.price);
+  if(f.compare_price!==null&&(!Number.isSafeInteger(f.compare_price)||f.compare_price<=highest))return er("The original price must be higher than every selling price, or left blank.");
+  var oc,och;
+  if(g){f.color=$("col").value.trim();f.color_hex=$("colh").value;if(!f.color)return er("Give this colour a name (e.g. Black).")}
+  if(o){oc=$("oc").value.trim();och=$("och").value;if(!oc)return er("Also enter the colour of the existing “"+o.name+"”.");if(oc.toLowerCase()==f.color.toLowerCase())return er("The two colours need different names.")}
+  var row={name:f.name,category:f.category,price:f.price,compare_price:f.compare_price,size_prices:f.size_prices,badge:f.badge,sizes:f.sizes,sku:f.sku,description:f.description,details:f.details,images:f.images,video_url:f.video_url,active:f.active,group_id:g?f.group_id:null,color:g?f.color:null,color_hex:g?f.color_hex:null};
+  var shared={name:f.name,category:f.category,price:f.price,compare_price:f.compare_price,size_prices:f.size_prices,badge:f.badge,description:f.description,details:f.details};
+  var fail=function(t){$("sv").disabled=false;er(t)},fin=function(){cur=null;products()};
+  var s3=function(){if(g&&$("shr").checked)db.from("products").update(shared).eq("group_id",f.group_id).then(function(r){r.error?fail(r.error.message):fin()});else fin()};
+  var s2=function(){(f.id?db.from("products").update(row).eq("id",f.id):db.from("products").insert(row)).then(function(r){r.error?fail(r.error.message):s3()})};
   $("sv").disabled=true;
-  (f.id?db.from("products").update(row).eq("id",f.id):db.from("products").insert(row)).then(function(r){
-   if(r.error){$("sv").disabled=false;return $("sm").textContent=r.error.message}cur=null;products()});
+  if(o){var nr=Object.assign({},row,{group_id:null,color:null,color_hex:null});
+  db.from("products").insert(nr).select("id").single().then(function(r){if(r.error)return fail(r.error.message);var nid=r.data.id;
+   db.rpc("group_products",{p_name:f.name,p_products:[{id:o.id,color:oc,color_hex:och},{id:nid,color:f.color,color_hex:f.color_hex}]}).then(function(r2){
+    if(r2.error){db.from("products").delete().eq("id",nid).then(function(){fail(r2.error.message)});return}
+    f.group_id=r2.data;s3()})})}
+ else s2();
  };
 }
 function media(){var f=cur;$("med").innerHTML=f.images.map(function(u,i){return '<div class="th"><img src="'+esc(th(u))+'" alt=""><span>'+(i?'<button data-c="'+i+'" title="Make cover">★</button>':'')+'<button data-r="'+i+'" title="Remove">✕</button></span></div>'}).join("")+(f.video_url?'<div class="th"><video src="'+esc(f.video_url)+'" muted></video><span><button data-v="1" title="Remove">✕</button></span></div>':"")}
@@ -107,16 +210,27 @@ function up(file){var v=file.type.indexOf("video")==0,fd=new FormData();fd.appen
 
 // ---------- orders ----------
 function pl(o){return o.payment_method=="upi"?' UPI <span class="tag" style="background:'+(o.paid?"var(--g);color:#fff":"var(--y)")+'">'+(o.paid?"PAID":"awaiting payment")+'</span>'+(o.utr?' <span class="tag" style="background:#fff">UTR '+esc(o.utr)+'</span>':''):' COD'}
+var ordN=50,ordArch=false,ordMap={};
 function orders(){
- $("v").innerHTML='<div class="box" id="list">Loading…</div>';
- db.from("orders").select("*").order("created_at",{ascending:false}).limit(200).then(function(r){
+ $("v").innerHTML='<div class="row" style="margin:0 0 14px"><button class="g" id="oa" style="border-color:var(--ink)">'+(ordArch?"← Back to active orders":"View archived orders")+'</button></div><div class="box" id="list">Loading…</div>';
+ $("oa").onclick=function(){ordArch=!ordArch;ordN=50;orders()};
+ db.from("orders").select("*").eq("archived",ordArch).order("created_at",{ascending:false}).range(0,ordN).then(function(r){
   if(r.error)return $("list").innerHTML='<span class="err">'+esc(r.error.message)+'</span>';
-  var d=r.data;$("list").innerHTML=d.length?d.map(function(o){
-   var items=o.items.map(function(i){return i.name+(i.size?" ("+i.size+")":"")+" × "+i.qty+"  ["+(i.sku||"no SKU")+"]"}).join("\n");
+  var more=r.data.length>ordN,d=r.data.slice(0,ordN);ordMap={};d.forEach(function(o){ordMap[o.id]=o});
+  $("list").innerHTML=(d.length?d.map(function(o){
+   var items=o.items.map(function(i){return i.name+(i.color?" – "+i.color:"")+(i.size?" ("+i.size+")":"")+" × "+i.qty+"  ["+(i.sku||"no SKU")+"]"}).join("\n");
    var txt=o.order_no+"\n"+items+(o.payment_method=="upi"?"\nPaid by UPI: ₹"+o.total+(o.paid?" (received)":" (NOT yet received)"):"\nCOD to collect: ₹"+o.total)+"\n"+o.name+" · "+o.phone+"\n"+o.address+", "+o.city+", "+o.state+" - "+o.pincode;
-   return '<div class="item" style="align-items:flex-start"><div><b>'+esc(o.order_no)+'</b> · ₹'+o.total+pl(o)+'<div class="m">'+esc(o.name)+' · '+esc(o.phone)+' · '+new Date(o.created_at).toLocaleString("en-IN")+'</div><details><summary>Details</summary><pre>'+esc(txt)+'</pre><button class="g" data-cp="'+esc(o.id)+'">Copy</button><a class="g" style="text-decoration:none;padding:9px 18px" target="_blank" rel="noopener" href="https://wa.me/91'+esc(o.phone)+'?text='+encodeURIComponent("Hi "+o.name+", confirming your order "+o.order_no+" (₹"+o.total+(o.payment_method=="upi"?" paid by UPI":" cash on delivery")+"). Reply YES to confirm.")+'">WhatsApp customer</a>'+(o.payment_method=="upi"?'<button class="g" data-pd="'+esc(o.id)+'" data-v="'+(o.paid?0:1)+'">'+(o.paid?"Mark unpaid":"Mark as paid")+'</button>':'')+'<button class="g" data-del="'+esc(o.id)+'" style="color:#c0392b">Delete order</button></details></div><select data-s="'+o.id+'" style="width:auto">'+ST.map(function(s){return '<option'+(s==o.status?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div>'}).join(""):'<span class="m">No orders yet.</span>';
-   $("list").onchange=function(e){if(e.target.dataset.s)db.from("orders").update({status:e.target.value}).eq("id",e.target.dataset.s).then(function(r){if(r.error)alert(r.error.message)})};
-   $("list").onclick=function(e){var pd=e.target.dataset.pd;if(pd){db.from("orders").update({paid:e.target.dataset.v=="1"}).eq("id",pd).select().then(function(r){if(r.error)return alert(r.error.message);orders()});return}var dl=e.target.dataset.del;if(dl&&confirm("Permanently delete this order? This cannot be undone.")){db.from("orders").delete().eq("id",dl).select().then(function(r){if(r.error)return alert(r.error.message);if(!r.data.length)return alert("Nothing was deleted. Re-run supabase-setup.sql in Supabase and try again.");orders()});return}var id=e.target.dataset.cp;if(id){navigator.clipboard.writeText(e.target.parentNode.querySelector("pre").textContent);e.target.textContent="Copied"}};
+   return '<div class="item" style="align-items:flex-start"><div><b>'+esc(o.order_no)+'</b> · ₹'+o.total+pl(o)+'<div class="m">'+esc(o.name)+' · '+esc(o.phone)+' · '+new Date(o.created_at).toLocaleString("en-IN")+'</div><details><summary>Details</summary><pre>'+esc(txt)+'</pre><button class="g" data-cp="'+esc(o.id)+'">Copy</button><a class="g" style="text-decoration:none;padding:9px 18px" target="_blank" rel="noopener" href="https://wa.me/91'+esc(o.phone)+'?text='+encodeURIComponent("Hi "+o.name+", confirming your order "+o.order_no+" (₹"+o.total+(o.payment_method=="upi"?" paid by UPI":" cash on delivery")+"). Reply YES to confirm.")+'">WhatsApp customer</a>'+(o.payment_method=="upi"?'<button class="g" data-pd="'+esc(o.id)+'" data-v="'+(o.paid?0:1)+'">'+(o.paid?"Mark unpaid":"Mark as paid")+'</button>':'')+'<button class="g" data-ar="'+esc(o.id)+'">'+(ordArch?"Unarchive":"Archive")+'</button>'+(ordArch?'<button class="g" data-del="'+esc(o.id)+'" style="color:#c0392b">Delete permanently</button>':'')+'</details></div><select data-s="'+esc(o.id)+'" style="width:auto">'+ST.map(function(s){return '<option'+(s==o.status?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div>'}).join(""):'<span class="m">No orders here.</span>')+(more?'<div class="row"><button class="b" id="om">Load more</button></div>':'');
+  if($("om"))$("om").onclick=function(){ordN+=50;orders()};
+  $("list").onchange=function(e){var id=e.target.dataset.s;if(!id)return;var o=ordMap[id],v=e.target.value;
+   if(o.payment_method=="upi"&&!o.paid&&["confirmed","sent to Qikink","shipped","delivered"].indexOf(v)>-1&&!confirm("This UPI order is NOT marked as paid. Move it forward anyway?")){e.target.value=o.status;return}
+   db.from("orders").update({status:v}).eq("id",id).select().then(function(r){if(r.error||!r.data.length){alert(r.error?r.error.message:"Update was blocked. Re-run supabase-setup.sql.");e.target.value=o.status;return}o.status=v})};
+  $("list").onclick=function(e){var k=e.target.dataset;
+   if(k.pd){if(k.v=="1"&&!ordMap[k.pd].utr&&!confirm("No UTR was submitted for this order. Mark as paid anyway?"))return;
+    db.from("orders").update({paid:k.v=="1"}).eq("id",k.pd).select().then(function(r){if(r.error)return alert(r.error.message);if(!r.data.length)return alert("Update was blocked. Re-run supabase-setup.sql.");orders()});return}
+   if(k.ar){db.from("orders").update({archived:!ordArch}).eq("id",k.ar).select().then(function(r){if(r.error)return alert(r.error.message);if(!r.data.length)return alert("Update was blocked. Re-run supabase-setup.sql.");orders()});return}
+   if(k.del&&confirm("Permanently delete this order? This cannot be undone.")){db.from("orders").delete().eq("id",k.del).select().then(function(r){if(r.error)return alert(r.error.message);if(!r.data.length)return alert("Nothing was deleted. Re-run supabase-setup.sql in Supabase and try again.");orders()});return}
+   if(k.cp){navigator.clipboard.writeText(e.target.parentNode.querySelector("pre").textContent);e.target.textContent="Copied"}};
  });
 }
 
@@ -128,7 +242,12 @@ function settings(){
   var qr=s.upi_qr||"",showQr=function(){$("qrw").innerHTML=qr?'<div class="th" style="width:160px;height:160px"><img style="width:160px;height:160px;object-fit:contain;background:#fff" src="'+esc(qr)+'" alt=""><span><button data-rq="1" title="Remove">✕</button></span></div>':'<span class="m">No QR uploaded yet.</span>'};showQr();
   $("qrw").onclick=function(e){if(e.target.dataset.rq){qr="";showQr()}};
   $("qf").onchange=function(){var f=this.files[0];this.value="";if(!f)return;$("qm").textContent="Uploading…";up(f).then(function(r){qr=r.url;showQr();$("qm").textContent="Uploaded. Click Save to publish it."}).catch(function(x){$("qm").innerHTML='<span class="err">'+esc(x.message)+'</span>'})};
-  $("ss").onclick=function(){db.from("settings").update({cod_fee:+$("cf").value,shipping:+$("sh").value,free_above:+$("fa").value,whatsapp:$("wa").value.trim(),upi_id:$("up").value.trim(),upi_qr:qr}).eq("id",1).then(function(r){$("sm").textContent=r.error?r.error.message:"Saved."})};
+  $("ss").onclick=function(){var cf=$("cf").value.trim(),sh=$("sh").value.trim(),fa=$("fa").value.trim(),wa=$("wa").value.trim(),upi=$("up").value.trim(),m=function(t){$("sm").textContent=t},isI=function(x){return /^\d{1,6}$/.test(x)};
+   if(!isI(cf)||!isI(sh)||!isI(fa))return m("COD fee, shipping and free-shipping amount must be whole numbers (0 or more).");
+   if(+fa===0&&!confirm("Free shipping above ₹0 makes ALL shipping free. Continue?"))return;
+   if(wa&&!/^\d{10,15}$/.test(wa))return m("WhatsApp number: digits only, with country code, e.g. 919876543210.");
+   if(qr&&!upi)return m("Enter your UPI ID when a QR is uploaded, so customers can check who they are paying.");
+   db.from("settings").update({cod_fee:+cf,shipping:+sh,free_above:+fa,whatsapp:wa,upi_id:upi,upi_qr:qr}).eq("id",1).select().then(function(r){m(r.error?r.error.message:(!r.data.length?"Blocked. Re-run supabase-setup.sql.":"Saved."))})};
  });
 }
 </script></body></html>
