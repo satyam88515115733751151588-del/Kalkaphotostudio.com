@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Admin · The Indian CULT.</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Admin · The Meme Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f2ec;--s:#ece6dc;--ink:#1b1814;--mute:#6f675c;--ac:#a8741f;--sh:0 14px 32px -14px rgba(60,40,10,.3)}
-@media(prefers-color-scheme:dark){:root{--bg:#121110;--s:#1c1a17;--ink:#efe9de;--mute:#9a9183;--ac:#d4a24c;--sh:0 14px 32px -14px rgba(0,0,0,.7)}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:300 15px/1.5 Inter,system-ui,sans-serif}
-h1,h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:400;margin:0 0 14px}h1 em{color:var(--ac)}
-.top{display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;box-shadow:var(--sh);border-radius:0 0 26px 26px;gap:10px;flex-wrap:wrap}
-.tabs{display:flex;gap:6px}.tabs button,.g,.b{border-radius:99px;border:1px solid var(--ink);background:none;color:var(--ink);padding:9px 18px;font:inherit;font-size:12px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
-.tabs button.on,.b{background:var(--ink);color:var(--bg)}.g{border-color:transparent;color:var(--mute)}
+:root{--ink:#0b0b0b;--mute:#6b6b6b;--line:#e8e8e8;--y:#FFD60A;--b:#2F5BFF;--r:#FF4D4D;--g:#12C47B;--p:#FF7AC6}
+*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:500 14px/1.5 Poppins,system-ui,sans-serif}
+h1,h2{font-weight:800;letter-spacing:-.02em;margin:0 0 14px}h1 em{color:var(--b);font-style:normal}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;background:var(--y);border-bottom:2px solid var(--ink);gap:10px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button,.g,.b{border-radius:99px;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:8px 18px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .1s,box-shadow .1s}
+.tabs button:active,.b:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+.tabs button.on{background:var(--b);color:#fff}.b{background:var(--b);color:#fff}
+.g{border-color:transparent;box-shadow:none;color:var(--ink);padding:7px 14px}.g:hover{border-color:var(--ink);background:var(--y)}
+.top .g{border-color:var(--ink);background:#fff}
 main{max-width:900px;margin:0 auto;padding:30px 5vw 80px}
-.box{background:var(--s);border-radius:28px;padding:24px;box-shadow:var(--sh);margin-bottom:20px}
-label{display:block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);margin:14px 0 6px}
-input:not([type=checkbox]):not([type=file]),textarea,select{width:100%;background:var(--bg);color:var(--ink);border:1px solid transparent;border-radius:16px;padding:11px 14px;font:inherit;outline:0}
-input:focus,textarea:focus,select:focus{border-color:var(--ac)}
-.ck{display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)}
+.box{background:#fff;border:2px solid var(--ink);border-radius:24px;padding:24px;box-shadow:0 5px 0 var(--ink);margin-bottom:22px}
+label{display:block;font-size:12px;font-weight:600;color:var(--mute);margin:14px 0 6px}
+input:not([type=checkbox]):not([type=file]),textarea,select{width:100%;background:#fff;color:var(--ink);border:2px solid var(--ink);border-radius:14px;padding:10px 14px;font:inherit;outline:0}
+select{border-radius:99px}
+input:focus,textarea:focus,select:focus{border-color:var(--b);box-shadow:0 0 0 3px #cfdbff}
+.ck{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);font-weight:600}
 .row{display:flex;gap:10px;margin-top:18px;align-items:center;flex-wrap:wrap}
-.item{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--bg)}.item>div{flex:1;min-width:0}
-.sq{width:64px;height:64px;border-radius:24%;object-fit:cover;background:var(--bg);flex:none;box-shadow:var(--sh)}
-.m{color:var(--mute);font-size:13px;margin:6px 0 0}.err{color:#c0392b}
-#med{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-.th{position:relative;width:96px;height:96px}.th img,.th video{width:96px;height:96px;object-fit:cover;border-radius:24%;box-shadow:var(--sh)}
+.item{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:2px dashed var(--line)}.item>div{flex:1;min-width:0}.item:last-child{border-bottom:0}
+.sq{width:64px;height:64px;border-radius:16px;object-fit:cover;background:#FFE88A;border:2px solid var(--ink);flex:none}
+.m{color:var(--mute);font-size:13px;margin:6px 0 0}.err{color:#e0312b}
+#med,#qrw{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.th{position:relative;width:96px;height:96px}.th img,.th video{width:96px;height:96px;object-fit:cover;border-radius:16px;border:2px solid var(--ink);background:#FFE88A}
 .th span{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
-.th button{border:0;border-radius:50%;width:26px;height:26px;background:var(--bg);color:var(--ink);cursor:pointer;box-shadow:var(--sh)}
-.tag{display:inline-block;background:var(--bg);border-radius:99px;padding:2px 10px;font-size:11px;margin-left:6px}
-details{margin-top:6px}summary{cursor:pointer;color:var(--ac)}pre{white-space:pre-wrap;font:inherit;color:var(--mute);margin:8px 0}
+.th button{border:2px solid var(--ink);border-radius:50%;width:26px;height:26px;background:#fff;color:var(--ink);cursor:pointer;font-weight:800;padding:0}
+.tag{display:inline-block;background:var(--y);border:2px solid var(--ink);border-radius:99px;padding:0 10px;font-size:11px;font-weight:700;margin-left:6px}
+details{margin-top:6px}summary{cursor:pointer;color:var(--b);font-weight:700}pre{white-space:pre-wrap;font:inherit;color:var(--mute);margin:8px 0}
 </style></head><body>
 <div id="app"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.js"></script>
@@ -39,7 +42,7 @@ var ST=["new","confirmed","sent to Qikink","shipped","delivered","cancelled","re
 db.auth.getSession().then(function(r){r.data.session?gate():login()});
 
 function login(){
- app.innerHTML='<main style="max-width:420px"><div class="box"><h1>The Indian <em>CULT.</em></h1><p class="m">Admin sign in</p><label>Email</label><input id="e" type="email" autocomplete="username"><label>Password</label><input id="p" type="password" autocomplete="current-password"><div class="row"><button class="b" id="go">Sign in</button></div><p class="m err" id="m"></p></div></main>';
+ app.innerHTML='<main style="max-width:420px"><div class="box"><h1>The Meme <em>Shop</em></h1><p class="m">Admin sign in</p><label>Email</label><input id="e" type="email" autocomplete="username"><label>Password</label><input id="p" type="password" autocomplete="current-password"><div class="row"><button class="b" id="go">Sign in</button></div><p class="m err" id="m"></p></div></main>';
  $("go").onclick=function(){db.auth.signInWithPassword({email:$("e").value.trim(),password:$("p").value}).then(function(r){r.error?$("m").textContent=r.error.message:gate()})};
 }
 // Customers also have accounts now, so only accounts listed in the "admins" table may use this page.
@@ -51,7 +54,7 @@ function gate(){
  });
 }
 function shell(){
- app.innerHTML='<div class="top"><h1 style="margin:0">Admin · <em>CULT.</em></h1><div class="tabs">'+["products","orders","settings"].map(function(t){return '<button data-t="'+t+'" class="'+(t==tab?"on":"")+'">'+t+'</button>'}).join("")+'</div><button class="g" id="out">Sign out</button></div><main id="v"></main>';
+ app.innerHTML='<div class="top"><h1 style="margin:0">Admin · <em>Meme Shop</em></h1><div class="tabs">'+["products","orders","settings"].map(function(t){return '<button data-t="'+t+'" class="'+(t==tab?"on":"")+'">'+t+'</button>'}).join("")+'</div><button class="g" id="out">Sign out</button></div><main id="v"></main>';
  app.querySelector(".tabs").onclick=function(e){if(e.target.dataset.t){tab=e.target.dataset.t;cur=null;shell()}};
  $("out").onclick=function(){db.auth.signOut().then(login)};
  ({products:products,orders:orders,settings:settings})[tab]();
@@ -103,16 +106,17 @@ function up(file){var v=file.type.indexOf("video")==0,fd=new FormData();fd.appen
  return fetch("https://api.cloudinary.com/v1_1/"+C.CLOUD+"/"+(v?"video":"image")+"/upload",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(j){if(!j.secure_url)throw new Error((j.error&&j.error.message)||"Upload failed");return{url:j.secure_url,video:v}})}
 
 // ---------- orders ----------
+function pl(o){return o.payment_method=="upi"?' UPI <span class="tag" style="background:'+(o.paid?"var(--g);color:#fff":"var(--y)")+'">'+(o.paid?"PAID":"awaiting payment")+'</span>'+(o.utr?' <span class="tag" style="background:#fff">UTR '+esc(o.utr)+'</span>':''):' COD'}
 function orders(){
  $("v").innerHTML='<div class="box" id="list">Loading…</div>';
  db.from("orders").select("*").order("created_at",{ascending:false}).limit(200).then(function(r){
   if(r.error)return $("list").innerHTML='<span class="err">'+esc(r.error.message)+'</span>';
   var d=r.data;$("list").innerHTML=d.length?d.map(function(o){
    var items=o.items.map(function(i){return i.name+(i.size?" ("+i.size+")":"")+" × "+i.qty+"  ["+(i.sku||"no SKU")+"]"}).join("\n");
-   var txt=o.order_no+"\n"+items+"\nCOD to collect: ₹"+o.total+"\n"+o.name+" · "+o.phone+"\n"+o.address+", "+o.city+", "+o.state+" - "+o.pincode;
-   return '<div class="item" style="align-items:flex-start"><div><b>'+esc(o.order_no)+'</b> · ₹'+o.total+' COD<div class="m">'+esc(o.name)+' · '+esc(o.phone)+' · '+new Date(o.created_at).toLocaleString("en-IN")+'</div><details><summary>Details</summary><pre>'+esc(txt)+'</pre><button class="g" data-cp="'+esc(o.id)+'">Copy</button><a class="g" style="text-decoration:none;padding:9px 18px" target="_blank" rel="noopener" href="https://wa.me/91'+esc(o.phone)+'?text='+encodeURIComponent("Hi "+o.name+", confirming your order "+o.order_no+" (₹"+o.total+" cash on delivery). Reply YES to confirm.")+'">WhatsApp customer</a></details></div><select data-s="'+o.id+'" style="width:auto">'+ST.map(function(s){return '<option'+(s==o.status?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div>'}).join(""):'<span class="m">No orders yet.</span>';
+   var txt=o.order_no+"\n"+items+(o.payment_method=="upi"?"\nPaid by UPI: ₹"+o.total+(o.paid?" (received)":" (NOT yet received)"):"\nCOD to collect: ₹"+o.total)+"\n"+o.name+" · "+o.phone+"\n"+o.address+", "+o.city+", "+o.state+" - "+o.pincode;
+   return '<div class="item" style="align-items:flex-start"><div><b>'+esc(o.order_no)+'</b> · ₹'+o.total+pl(o)+'<div class="m">'+esc(o.name)+' · '+esc(o.phone)+' · '+new Date(o.created_at).toLocaleString("en-IN")+'</div><details><summary>Details</summary><pre>'+esc(txt)+'</pre><button class="g" data-cp="'+esc(o.id)+'">Copy</button><a class="g" style="text-decoration:none;padding:9px 18px" target="_blank" rel="noopener" href="https://wa.me/91'+esc(o.phone)+'?text='+encodeURIComponent("Hi "+o.name+", confirming your order "+o.order_no+" (₹"+o.total+(o.payment_method=="upi"?" paid by UPI":" cash on delivery")+"). Reply YES to confirm.")+'">WhatsApp customer</a>'+(o.payment_method=="upi"?'<button class="g" data-pd="'+esc(o.id)+'" data-v="'+(o.paid?0:1)+'">'+(o.paid?"Mark unpaid":"Mark as paid")+'</button>':'')+'<button class="g" data-del="'+esc(o.id)+'" style="color:#c0392b">Delete order</button></details></div><select data-s="'+o.id+'" style="width:auto">'+ST.map(function(s){return '<option'+(s==o.status?" selected":"")+'>'+s+'</option>'}).join("")+'</select></div>'}).join(""):'<span class="m">No orders yet.</span>';
    $("list").onchange=function(e){if(e.target.dataset.s)db.from("orders").update({status:e.target.value}).eq("id",e.target.dataset.s).then(function(r){if(r.error)alert(r.error.message)})};
-   $("list").onclick=function(e){var id=e.target.dataset.cp;if(id){navigator.clipboard.writeText(e.target.parentNode.querySelector("pre").textContent);e.target.textContent="Copied"}};
+   $("list").onclick=function(e){var pd=e.target.dataset.pd;if(pd){db.from("orders").update({paid:e.target.dataset.v=="1"}).eq("id",pd).select().then(function(r){if(r.error)return alert(r.error.message);orders()});return}var dl=e.target.dataset.del;if(dl&&confirm("Permanently delete this order? This cannot be undone.")){db.from("orders").delete().eq("id",dl).select().then(function(r){if(r.error)return alert(r.error.message);if(!r.data.length)return alert("Nothing was deleted. Re-run supabase-setup.sql in Supabase and try again.");orders()});return}var id=e.target.dataset.cp;if(id){navigator.clipboard.writeText(e.target.parentNode.querySelector("pre").textContent);e.target.textContent="Copied"}};
  });
 }
 
@@ -120,8 +124,11 @@ function orders(){
 function settings(){
  $("v").innerHTML='<div class="box" id="list">Loading…</div>';
  db.from("settings").select("*").eq("id",1).single().then(function(r){var s=r.data||{};
-  $("list").innerHTML='<h2>Store settings</h2>'+fld("COD handling fee (₹)","cf",s.cod_fee,"number")+fld("Shipping charge (₹)","sh",s.shipping,"number")+fld("Free shipping above (₹)","fa",s.free_above,"number")+fld("WhatsApp number for order confirmations (with 91, no +)","wa",s.whatsapp)+'<div class="row"><button class="b" id="ss">Save</button></div><p class="m" id="sm"></p>';
-  $("ss").onclick=function(){db.from("settings").update({cod_fee:+$("cf").value,shipping:+$("sh").value,free_above:+$("fa").value,whatsapp:$("wa").value.trim()}).eq("id",1).then(function(r){$("sm").textContent=r.error?r.error.message:"Saved."})};
+  $("list").innerHTML='<h2>Store settings</h2>'+fld("COD handling fee (₹)","cf",s.cod_fee,"number")+fld("Shipping charge (₹)","sh",s.shipping,"number")+fld("Free shipping above (₹)","fa",s.free_above,"number")+fld("WhatsApp number for order confirmations (with 91, no +)","wa",s.whatsapp)+'<h2 style="margin-top:28px">Pay before (UPI)</h2><p class="m" style="margin:0">Upload your UPI QR once. Customers who pick "Pay now by UPI" see it with the amount to pay. Remove it to hide the option.</p>'+fld("UPI ID shown under the QR, optional","up",s.upi_id)+'<label>UPI QR code image</label><div id="qrw"></div><input type="file" id="qf" accept="image/*"><p class="m" id="qm"></p><div class="row"><button class="b" id="ss">Save</button></div><p class="m" id="sm"></p>';
+  var qr=s.upi_qr||"",showQr=function(){$("qrw").innerHTML=qr?'<div class="th" style="width:160px;height:160px"><img style="width:160px;height:160px;object-fit:contain;background:#fff" src="'+esc(qr)+'" alt=""><span><button data-rq="1" title="Remove">✕</button></span></div>':'<span class="m">No QR uploaded yet.</span>'};showQr();
+  $("qrw").onclick=function(e){if(e.target.dataset.rq){qr="";showQr()}};
+  $("qf").onchange=function(){var f=this.files[0];this.value="";if(!f)return;$("qm").textContent="Uploading…";up(f).then(function(r){qr=r.url;showQr();$("qm").textContent="Uploaded. Click Save to publish it."}).catch(function(x){$("qm").innerHTML='<span class="err">'+esc(x.message)+'</span>'})};
+  $("ss").onclick=function(){db.from("settings").update({cod_fee:+$("cf").value,shipping:+$("sh").value,free_above:+$("fa").value,whatsapp:$("wa").value.trim(),upi_id:$("up").value.trim(),upi_qr:qr}).eq("id",1).then(function(r){$("sm").textContent=r.error?r.error.message:"Saved."})};
  });
 }
 </script></body></html>
