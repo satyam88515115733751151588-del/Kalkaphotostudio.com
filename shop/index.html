@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://res.cloudinary.com; media-src https://res.cloudinary.com; connect-src 'self' https://adisludphpflvmoajeif.supabase.co wss://adisludphpflvmoajeif.supabase.co https://api.cloudinary.com; object-src 'none'; base-uri 'none'; form-action 'self'">
 <title>The Meme Shop by Kalka Studio</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -125,6 +126,11 @@ input,textarea{width:100%;background:#fff;border:2px solid var(--ink);border-rad
 .oi small{display:block;color:var(--mute)}
 .pay{display:grid;gap:10px;margin:18px 0 6px}.po{text-align:left;border:2px solid var(--ink);background:#fff;border-radius:16px;padding:11px 14px}.po b{display:block;font-weight:800}.po small{color:var(--mute);font-weight:500}.po.on{background:var(--y);box-shadow:0 3px 0 var(--ink)}
 .pb{background:#EAF0FF;border:2px solid var(--ink);border-radius:20px;padding:16px;margin:14px 0;text-align:center}.pb h4{margin:0 0 10px;font-size:17px;font-weight:800}.qr{width:min(260px,100%);background:#fff;border:2px solid var(--ink);border-radius:16px;padding:8px;display:block;margin:0 auto 10px}.pb input{margin:10px 0 0;text-align:center}
+.sws{display:flex;gap:6px;align-items:center;margin-top:9px;flex-wrap:wrap}.sws i{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);display:block}.sws small{color:var(--mute);font-size:11px;font-weight:600;margin-left:2px}
+.cols{display:flex;gap:12px;flex-wrap:wrap;padding:4px}
+.cb{display:block;width:38px;height:38px;border-radius:50%;border:2px solid var(--ink);padding:0}
+.cb:hover{transform:translateY(-2px)}.cb.on{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}
+.cb.txt{width:auto;height:44px;border-radius:99px;padding:0 18px;background:#fff;font-weight:700;display:grid;place-items:center}.cb.txt.on{background:var(--ink);color:#fff;box-shadow:none}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
 <div class="ann" id="ann" hidden></div>
@@ -153,31 +159,43 @@ var $=function(i){return document.getElementById(i)},rs=function(n){return "₹"
 var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
 var byId=function(id){return P.filter(function(x){return x.id==id})[0]};
 var cl=function(u,t){return u?u.replace("/upload/","/upload/"+t+",q_auto,f_auto/"):""};
-var payM="cod",ready=false,ORD=["XXS","XS","S","M","L","XL","XXL","XXXL"];
+var coKey=null,payM="cod",ready=false,ORD=["XXS","XS","S","M","L","XL","XXL","XXXL"];
 var ICON={x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',play:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l5.5-3.5z"/></svg>'};
-function save(){try{localStorage.setItem("cult_cart2",JSON.stringify(cart))}catch(e){}var n=cart.reduce(function(a,c){return a+c.q},0);$("cnt").textContent=n||""}
+function newKey(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function save(){coKey=null;try{localStorage.setItem("cult_cart2",JSON.stringify(cart))}catch(e){}var n=cart.reduce(function(a,c){return a+c.q},0);$("cnt").textContent=n||""}
 function cats(){return P.map(function(p){return p.category}).filter(function(v,i,a){return a.indexOf(v)==i})}
-function priceHTML(p){var c=p.compare_price;return '<div class="pr"><b>'+rs(p.price)+'</b>'+(c&&c>p.price?'<s>'+rs(c)+'</s>':'')+'</div>'}
+var lastSize="";
+function okHex(h){return /^#[0-9a-fA-F]{6}$/.test(h||"")?h:""}
+function sameG(a,b){return a.id==b.id||(!!a.group_id&&a.group_id==b.group_id)}
+function vars(p){if(!p.group_id)return [p];var v=P.filter(function(x){return x.group_id==p.group_id}).sort(function(a,b){return a.created_at<b.created_at?-1:a.created_at>b.created_at?1:0});return v.length?v:[p]}
+function reps(){return P.filter(function(p){return vars(p)[0].id==p.id})}
+function szOf(p){var o=[];vars(p).forEach(function(v){v.sizes.forEach(function(z){if(o.indexOf(z)<0)o.push(z)})});return o.sort(function(a,b){var i=ORD.indexOf(a),j=ORD.indexOf(b);return (i<0?99:i)-(j<0?99:j)||a.localeCompare(b)})}
+function swHTML(p){var v=vars(p);if(v.length<2)return"";return '<div class="sws">'+v.map(function(x){var h=okHex(x.color_hex);return h?'<i title="'+esc(x.color)+'" style="background:'+h+'"></i>':''}).join("")+'<small>'+v.length+' colours</small></div>'}
+function colHTML(p,v){if(v.length<2)return"";return '<div class="lab">Colour: <span style="font-weight:500">'+esc(p.color||"")+'</span></div><div class="cols">'+v.map(function(x){var h=okHex(x.color_hex),on=x.id==p.id?" on":"";return h?'<a class="cb'+on+'" href="#product-'+x.id+'" style="background:'+h+'" title="'+esc(x.color)+'" aria-label="'+esc(x.color)+'"></a>':'<a class="cb txt'+on+'" href="#product-'+x.id+'">'+esc(x.color)+'</a>'}).join("")+'</div>'}
+function optTxt(p,c){var a=[];if(p.color)a.push("Colour "+esc(p.color));if(c.s)a.push("Size "+esc(c.s));return a.length?a.join(" \u00b7 "):"One size"}
+function priceFor(p,size){var m=p.size_prices||{};return size&&Object.prototype.hasOwnProperty.call(m,size)?Number(m[size]):Number(p.price)}
+function lowestPrice(p){var vals=[];vars(p).forEach(function(v){if(v.sizes&&v.sizes.length)v.sizes.forEach(function(z){vals.push(priceFor(v,z))});else vals.push(priceFor(v,""))});return vals.length?Math.min.apply(Math,vals):priceFor(p,"")}
+function priceHTML(p,size){var c=p.compare_price,price;if(size!==undefined){price=priceFor(p,size)}else{var vals=[];vars(p).forEach(function(v){if(v.sizes&&v.sizes.length)v.sizes.forEach(function(z){vals.push(priceFor(v,z))});else vals.push(priceFor(v,""))});var lo=Math.min.apply(Math,vals),hi=Math.max.apply(Math,vals);price=lo===hi?rs(lo):"From "+rs(lo)}return '<div class="pr"><b>'+(typeof price==="number"?rs(price):price)+'</b>'+(c&&c>priceFor(p,size||((p.sizes&&p.sizes[0])||""))?'<s>'+rs(c)+'</s>':'')+'</div>'}
 
 /* ---------- header, menu, footer ---------- */
 function chrome(){
  var l=['<a href="#" class="'+(cat=="All"&&!isProd()?"on":"")+'">All</a>'].concat(cats().map(function(c){return '<a href="#cat-'+encodeURIComponent(c)+'" class="'+(c==cat&&!isProd()?"on":"")+'">'+esc(c)+'</a>'}));
  $("nav").innerHTML=l.join("");$("mnu").innerHTML=l.join("").replace(/ class="[^"]*"/g,"");
  $("ann").hidden=false;$("ann").textContent=(S.upi_qr?"Pay by UPI or cash on delivery":"Cash on delivery")+" across India. Free shipping above "+rs(S.free_above)+".";
- $("foot").innerHTML='<div>The Meme Shop by Kalka Studio · © 2026 · <a href="https://www.kalkaphotostudio.com">kalkaphotostudio.com</a>'+(S.whatsapp?' · <a target="_blank" rel="noopener" href="https://wa.me/'+esc(S.whatsapp)+'">Chat on WhatsApp</a>':'')+'</div>';
+ $("foot").innerHTML='<div>The Meme Shop by Kalka Studio · © 2026 · <a href="https://www.kalkaphotostudio.com">kalkaphotostudio.com</a> · <a href="#page-returns">Returns</a> · <a href="#page-privacy">Privacy</a> · <a href="#page-terms">Terms</a>'+(S.whatsapp?' · <a target="_blank" rel="noopener" href="https://wa.me/'+esc(S.whatsapp)+'">Chat on WhatsApp</a>':'')+'</div>';
 }
 function isProd(){return /^#product-/.test(location.hash)}
 
 /* ---------- collection ---------- */
 function list(){
- var l=P.filter(function(p){return cat=="All"||p.category==cat});
- if(fsz.length)l=l.filter(function(p){return p.sizes.some(function(z){return fsz.indexOf(z)>-1})});
- var f={lo:function(a,b){return a.price-b.price},hi:function(a,b){return b.price-a.price},az:function(a,b){return a.name.localeCompare(b.name)},za:function(a,b){return b.name.localeCompare(a.name)}}[srt];
+ var l=reps().filter(function(p){return cat=="All"||p.category==cat});
+ if(fsz.length)l=l.filter(function(p){return szOf(p).some(function(z){return fsz.indexOf(z)>-1})});
+ var f={lo:function(a,b){return lowestPrice(a)-lowestPrice(b)},hi:function(a,b){return lowestPrice(b)-lowestPrice(a)},az:function(a,b){return a.name.localeCompare(b.name)},za:function(a,b){return b.name.localeCompare(a.name)}}[srt];
  return f?l.slice().sort(f):l;
 }
 function card(p){
  var a=p.images[0],b=p.images[1];
- return '<a class="card" href="#product-'+p.id+'"><div class="im">'+(a?'<img class="a" loading="lazy" src="'+esc(cl(a,"c_fill,ar_2:3,w_700"))+'" alt="'+esc(p.name)+'">':'<span class="ph">'+esc(p.name.charAt(0))+'</span>')+(b?'<img class="b" loading="lazy" src="'+esc(cl(b,"c_fill,ar_2:3,w_700"))+'" alt="">':'')+(p.badge?'<span class="bd">'+esc(p.badge)+'</span>':'')+'</div><h3>'+esc(p.name)+'</h3>'+priceHTML(p)+(p.sizes.length?'<div class="szs">'+p.sizes.map(function(z){return '<span>'+esc(z)+'</span>'}).join("")+'</div>':'')+'</a>';
+ return '<a class="card" href="#product-'+p.id+'"><div class="im">'+(a?'<img class="a" loading="lazy" src="'+esc(cl(a,"c_fill,ar_2:3,w_700"))+'" alt="'+esc(p.name)+'">':'<span class="ph">'+esc(p.name.charAt(0))+'</span>')+(b?'<img class="b" loading="lazy" src="'+esc(cl(b,"c_fill,ar_2:3,w_700"))+'" alt="">':'')+(p.badge?'<span class="bd">'+esc(p.badge)+'</span>':'')+'</div><h3>'+esc(p.name)+'</h3>'+priceHTML(p)+swHTML(p)+(szOf(p).length?'<div class="szs">'+szOf(p).map(function(z){return '<span>'+esc(z)+'</span>'}).join("")+'</div>':'')+'</a>';
 }
 function shop(){
  document.title=(cat=="All"?"":cat+" · ")+"The Meme Shop";
@@ -194,22 +212,30 @@ function shop(){
 function product(p){
  document.title=p.name+" · The Meme Shop";
  var it=p.images.map(function(u){return {v:0,u:u}});if(p.video_url)it.push({v:1,u:p.video_url});
- var g=gal[p.id]||0;if(g>=it.length)g=0;var cur=it[g],sel=picked[p.id]||p.sizes[0]||"";
- var main=!cur?'<span class="ph">'+esc(p.name.charAt(0))+'</span>':cur.v?'<video src="'+esc(cur.u)+'" controls playsinline autoplay muted loop></video>':'<img src="'+esc(cl(cur.u,"c_fill,ar_2:3,w_1200"))+'" alt="'+esc(p.name)+'">';
+ var g=gal[p.id]||0;if(g>=it.length)g=0;var cur=it[g],vs=vars(p),sel=picked[p.id]||(p.sizes.indexOf(lastSize)>-1?lastSize:p.sizes[0])||"";picked[p.id]=sel;
+ var main=!cur?'<span class="ph">'+esc(p.name.charAt(0))+'</span>':cur.v?'<video src="'+esc(cur.u.replace("/upload/","/upload/q_auto/"))+'" controls playsinline autoplay muted loop></video>':'<img src="'+esc(cl(cur.u,"c_fill,ar_2:3,w_1200"))+'" alt="'+esc(p.name)+'">';
  var ths=it.length>1?'<div class="ths">'+it.map(function(x,j){return '<button class="th '+(j==g?"on":"")+'" data-g="'+j+'" aria-label="Show media '+(j+1)+'">'+(x.v?ICON.play:'<img src="'+esc(cl(x.u,"c_fill,ar_2:3,w_160"))+'" alt="">')+'</button>'}).join("")+'</div>':'';
  var facts=(p.details||"").split("\n").map(function(s){return s.trim()}).filter(Boolean).map(function(s){return '<li>'+esc(s)+'</li>'}).join("");
- var more=P.filter(function(x){return x.id!=p.id&&x.category==p.category}).concat(P.filter(function(x){return x.id!=p.id&&x.category!=p.category})).slice(0,4);
+ var R=reps(),more=R.filter(function(x){return !sameG(x,p)&&x.category==p.category}).concat(R.filter(function(x){return !sameG(x,p)&&x.category!=p.category})).slice(0,4);
  $("view").innerHTML='<div class="wrap"><div class="pg"><div class="gal">'+ths+'<div class="mn">'+main+(p.badge?'<span class="bd">'+esc(p.badge)+'</span>':'')+'</div></div>'+
- '<div class="info"><h1>'+esc(p.name)+'</h1>'+priceHTML(p)+
- (p.sizes.length?'<div class="lab">Size</div><div class="sz">'+p.sizes.map(function(z){return '<button class="chip '+(z==sel?"on":"")+'" data-p="'+p.id+'" data-s="'+esc(z)+'">'+esc(z)+'</button>'}).join("")+'</div>':'')+
+ '<div class="info"><h1>'+esc(p.name)+'</h1>'+priceHTML(p,sel)+
+ colHTML(p,vs)+(p.sizes.length?'<div class="lab">Size</div><div class="sz">'+p.sizes.map(function(z){return '<button class="chip '+(z==sel?"on":"")+'" data-p="'+p.id+'" data-s="'+esc(z)+'">'+esc(z)+'</button>'}).join("")+'</div>':'')+
  '<div class="acts"><button class="btn solid" data-add="'+p.id+'">Add to cart</button><button class="btn" data-buy="'+p.id+'">Buy it now</button></div>'+
  '<ul class="fx"><li><b>Payment</b><span>'+(S.upi_qr?"UPI or cash on delivery":"Cash on delivery")+'</span></li><li><b>Delivery</b><span>5–8 working days · free above '+rs(S.free_above)+'</span></li></ul>'+
  (p.description||facts?'<div class="ab"><h2>About the product</h2>'+(p.description?'<p>'+esc(p.description)+'</p>':'')+(facts?'<ul>'+facts+'</ul>':'')+'</div>':'')+'</div></div>'+
  (more.length?'<section class="more"><h2>You may also like</h2><div class="grid">'+more.map(card).join("")+'</div></section>':'')+'</div>';
 }
+/* ---------- policy pages (TEMPLATES: edit SELLER and have the wording reviewed for your business) ---------- */
+var SELLER={name:"Kalka Studio",address:"ADD YOUR REGISTERED ADDRESS",email:"ADD YOUR SUPPORT EMAIL",officer:"ADD GRIEVANCE OFFICER NAME"};
+var PAGES={
+ returns:["Returns & refunds",["Every piece is made to order, so we cannot accept returns for change of mind or a wrong size chosen.","If your order arrives damaged, defective or incorrect, message us within 48 hours of delivery with photos and your order number. We will replace it or refund you.","Approved refunds go back to the original payment method within 7 working days. Cash on delivery refunds are sent by UPI or bank transfer.","An order can be cancelled until it is sent for printing. After that it cannot be cancelled."]],
+ privacy:["Privacy policy",["We collect your name, email, phone number and delivery address only to process, deliver and support your order and to run your account.","We share the details needed for printing and delivery with our production and courier partners. We do not sell your data.","Your account and orders are stored with our database provider. You can ask us to correct or delete your data by emailing the address below."]],
+ terms:["Terms of sale",["Prices are in Indian rupees and include applicable taxes unless stated. Shipping and any cash on delivery handling fee are shown before you place your order.","Products are made to order and delivered in about 5 to 8 working days across India. Colours may vary slightly from screens.","UPI orders are confirmed only after we verify your payment. We may cancel an order we cannot fulfil or verify and will refund any amount received."]]
+};
+function page(k){var d=PAGES[k];document.title=d[0]+" \u00b7 The Meme Shop";$("view").innerHTML='<div class="wrap acc"><h1 class="ttl">'+esc(d[0])+'</h1>'+d[1].map(function(x){return '<p style="font-weight:400;max-width:70ch">'+esc(x)+'</p>'}).join("")+'<h2 class="sub">Seller and grievance contact</h2><p style="font-weight:400">'+esc(SELLER.name)+'<br>'+esc(SELLER.address)+'<br>Email: '+esc(SELLER.email)+'<br>Grievance officer: '+esc(SELLER.officer)+' (we reply within 48 hours)</p></div>'}
 function route(){
- var h=decodeURIComponent(location.hash.slice(1)),m=h.match(/^product-([0-9a-f-]{36})$/),p=m&&byId(m[1]);
- if(h=="account"){account()}else if(p){product(p)}else{var c=h.indexOf("cat-")==0?h.slice(4):"All";if(c!=cat){fsz=[]}cat=cats().indexOf(c)>-1?c:"All";shop()}
+ var h;try{h=decodeURIComponent(location.hash.slice(1))}catch(e){h=""}var m=h.match(/^product-([0-9a-f-]{36})$/),p=m&&byId(m[1]);
+ if(h=="account"){account()}else if(/^page-(returns|privacy|terms)$/.test(h)){page(h.slice(5))}else if(p){product(p)}else{var c=h.indexOf("cat-")==0?h.slice(4):"All";if(c!=cat){fsz=[]}cat=cats().indexOf(c)>-1?c:"All";shop()}
  chrome();window.scrollTo(0,0);
 }
 window.addEventListener("hashchange",route);
@@ -217,16 +243,16 @@ $("logo").onclick=function(e){e.preventDefault();if(location.hash){location.hash
 function keep(fn){var y=scrollY;fn();scrollTo(0,y)}
 
 /* ---------- cart ---------- */
-function totals(){var sub=cart.reduce(function(a,c){return a+byId(c.id).price*c.q},0),ship=!sub||sub>=S.free_above?0:S.shipping,m=S.upi_qr?payM:"cod",cod=sub&&m=="cod"?S.cod_fee:0;return{sub:sub,ship:ship,cod:cod,m:m,total:sub?sub+ship+cod:0}}
+function totals(){var sub=cart.reduce(function(a,c){return a+priceFor(byId(c.id),c.s)*c.q},0),ship=!sub||sub>=S.free_above?0:S.shipping,m=S.upi_qr?payM:"cod",cod=sub&&m=="cod"?S.cod_fee:0;return{sub:sub,ship:ship,cod:cod,m:m,total:sub?sub+ship+cod:0}}
 function sumHTML(t){return nudge(t)+'<div class="sum"><div><span>Subtotal</span><span>'+rs(t.sub)+'</span></div><div><span>Shipping</span><span>'+(t.ship?rs(t.ship):"Free")+'</span></div>'+(t.m=="cod"?'<div><span>COD handling</span><span>'+rs(t.cod)+'</span></div>':'')+'<div class="tot"><span>'+(t.m=="cod"?"Pay on delivery":"Pay now")+'</span><span>'+rs(t.total)+'</span></div></div>'}
 var STEPS=[["new","Placed"],["confirmed","Confirmed"],["sent to Qikink","Printing"],["shipped","Shipped"],["delivered","Delivered"]],LBL={"new":"Order placed","confirmed":"Confirmed","sent to Qikink":"Being printed","shipped":"On the way","delivered":"Delivered",cancelled:"Cancelled",returned:"Returned"};
 function formVals(){var v={};["f_n","f_p","f_a","f_c","f_s","f_z"].forEach(function(i){v[i]=$(i).value});return v}
 function payPick(){if(!S.upi_qr)return '<div class="cod">Cash on Delivery: pay when your order arrives.</div>';return '<div class="pay"><button class="po'+(payM=="cod"?" on":"")+'" data-pay="cod"><b>Cash on delivery</b><small>Pay when it arrives \u00b7 +'+rs(S.cod_fee)+' handling</small></button><button class="po'+(payM=="upi"?" on":"")+'" data-pay="upi"><b>Pay now by UPI</b><small>Scan the QR \u00b7 no COD fee</small></button></div>'}
-function payBox(no,total){return '<div class="pb"><h4>Pay '+rs(total)+' by UPI</h4><img class="qr" src="'+esc(cl(S.upi_qr,"c_limit,w_600"))+'" alt="UPI QR code">'+(S.upi_id?'<p class="hint">UPI ID: <b>'+esc(S.upi_id)+'</b></p>':'')+'<p class="hint">Scan with any UPI app and pay exactly '+rs(total)+'. Then enter the reference (UTR) number from your app.</p><input id="utr_'+esc(no)+'" placeholder="UPI reference number" maxlength="30"><div class="msg" id="um_'+esc(no)+'"></div><button class="btn solid" data-utr="'+esc(no)+'">I\u2019ve paid</button></div>'}
+function payBox(no,total){return '<div class="pb"><h4>Pay '+rs(total)+' by UPI</h4><img class="qr" src="'+esc(cl(S.upi_qr,"c_limit,w_600"))+'" alt="UPI QR code">'+(S.upi_id?'<p class="hint">UPI ID: <b>'+esc(S.upi_id)+'</b></p><a class="btn solid" style="margin:0 0 10px" href="'+esc('upi://pay?pa='+encodeURIComponent(S.upi_id)+'&pn='+encodeURIComponent("The Meme Shop")+'&am='+Number(total)+'&cu=INR&tn='+encodeURIComponent(no))+'">Open UPI app (amount pre-filled)</a>':'')+'<p class="hint">Scan with any UPI app and pay exactly '+rs(total)+'. Then enter the reference (UTR) number from your app.</p><input id="utr_'+esc(no)+'" placeholder="UPI reference number" maxlength="30"><div class="msg" id="um_'+esc(no)+'"></div><button class="btn solid" data-utr="'+esc(no)+'">I\u2019ve paid</button></div>'}
 function upiNote(o,bad){if(o.payment_method!="upi"||o.paid||bad)return"";if(o.utr)return '<p class="hint" style="margin-top:8px">Payment reference <b>'+esc(o.utr)+'</b> received. We will verify it shortly.</p>';return S.upi_qr?payBox(o.order_no,o.total):""}
 function nudge(t){if(!t.sub)return"";if(t.sub>=S.free_above)return '<div class="nudge ok">You\u2019ve unlocked free shipping.</div>';var l=S.free_above-t.sub;return '<div class="nudge">Add '+rs(l)+' more for free shipping<i><b style="width:'+Math.round(t.sub/S.free_above*100)+'%"></b></i></div>'}
-function sugg(){var ids=cart.map(function(c){return c.id}),cs=cart.map(function(c){return byId(c.id).category}),o=P.filter(function(p){return ids.indexOf(p.id)<0});return o.filter(function(p){return cs.indexOf(p.category)<0}).concat(o.filter(function(p){return cs.indexOf(p.category)>-1})).slice(0,4)}
-function suggHTML(t){var l=sugg();if(!l.length||!cart.length)return"";return '<div class="sg"><h4>'+t+'</h4>'+l.map(function(p){var im=p.images[0];return '<div class="sgi"><span class="t">'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</span><div><b>'+esc(p.name)+'</b><small>'+rs(p.price)+(p.sizes.length?' \u00b7 size '+esc(picked[p.id]||p.sizes[0]):'')+'</small></div><button class="add" data-sadd="'+p.id+'" aria-label="Add '+esc(p.name)+' to order">+ Add</button></div>'}).join("")+'</div>'}
+function sugg(){var inC=cart.map(function(c){return byId(c.id)}),cs=inC.map(function(p){return p.category}),o=reps().filter(function(p){return !inC.some(function(q){return sameG(q,p)})});return o.filter(function(p){return cs.indexOf(p.category)<0}).concat(o.filter(function(p){return cs.indexOf(p.category)>-1})).slice(0,4)}
+function suggHTML(t){var l=sugg();if(!l.length||!cart.length)return"";return '<div class="sg"><h4>'+t+'</h4>'+l.map(function(p){var im=p.images[0];return '<div class="sgi"><span class="t">'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</span><div><b>'+esc(p.name)+'</b><small>'+rs(priceFor(p,picked[p.id]||p.sizes[0]||''))+(p.sizes.length?' \u00b7 size '+esc(picked[p.id]||p.sizes[0]):'')+'</small></div><button class="add" data-sadd="'+p.id+'" aria-label="Add '+esc(p.name)+' to order">+ Add</button></div>'}).join("")+'</div>'}
 function account(){
  document.title="My account \u00b7 The Meme Shop";
  if(!user){$("view").innerHTML='<div class="wrap"><div class="empty">Sign in to see your orders.<br><button class="btn solid auto" id="signinBtn">Sign in</button></div></div>';return}
@@ -240,7 +266,7 @@ function account(){
    var i=STEPS.map(function(x){return x[0]}).indexOf(o.status),bad=i<0,cls=bad?"bad":o.status=="delivered"?"good":"";
    var trk=bad?'':'<div class="trk">'+STEPS.map(function(x,j){return '<div class="'+(j<i||o.status=="delivered"?"sd":j==i?"sn":"")+'">'+x[1]+'</div>'}).join("")+'</div>';
    return '<div class="ord"><div class="oh"><div><b>'+esc(o.order_no)+'</b><div class="hint">'+new Date(o.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})+' \u00b7 '+rs(o.total)+(o.payment_method=="upi"?(o.paid?" paid by UPI":" via UPI"):" cash on delivery")+'</div></div><span class="pill '+cls+'">'+esc(LBL[o.status]||o.status)+'</span></div>'+trk+upiNote(o,bad)+
-   o.items.map(function(x){var p=byId(x.product_id),im=p&&p.images[0];return '<div class="oi"><span class="t">'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</span><div>'+esc(x.name)+'<small>'+(x.size?"Size "+esc(x.size)+" \u00b7 ":"")+'Qty '+x.qty+'</small></div><b>'+rs(x.price*x.qty)+'</b></div>'}).join("")+
+   o.items.map(function(x){var p=byId(x.product_id),im=p&&p.images[0];return '<div class="oi"><span class="t">'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</span><div>'+esc(x.name)+'<small>'+((x.color||(p&&p.color))?"Colour "+esc(x.color||p.color)+" \u00b7 ":"")+(x.size?"Size "+esc(x.size)+" \u00b7 ":"")+'Qty '+x.qty+'</small></div><b>'+rs(x.price*x.qty)+'</b></div>'}).join("")+
    '<div class="hint" style="margin-top:10px">Delivering to '+esc(o.name)+', '+esc(o.address)+', '+esc(o.city)+' - '+esc(o.pincode)+'</div></div>'}).join("");
  });
 }
@@ -248,7 +274,7 @@ function cartView(){
  var n=cart.reduce(function(a,c){return a+c.q},0);
  $("dTitle").textContent="Your cart"+(n?" ("+n+")":"");
  if(!cart.length){$("body").innerHTML='<div class="empty">Your cart is empty.<br><button class="btn auto" data-close>Continue shopping</button></div>';return}
- $("body").innerHTML=cart.map(function(c,i){var p=byId(c.id),im=p.images[0];return '<div class="line"><a class="t" href="#product-'+p.id+'" data-close>'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</a><div><a href="#product-'+p.id+'" data-close>'+esc(p.name)+'</a><small>'+(c.s?"Size "+esc(c.s):"One size")+'</small><div class="qty"><button data-q="'+i+'" data-d="-1" aria-label="Decrease">−</button><span>'+c.q+'</span><button data-q="'+i+'" data-d="1" aria-label="Increase">+</button></div> <button class="lnk" data-rm="'+i+'">Remove</button></div><div>'+rs(p.price*c.q)+'</div></div>'}).join("")+sumHTML(totals())+suggHTML("Add to your order")+'<button class="btn solid" id="toCo">'+(user?(S.upi_qr?"Checkout":"Checkout · Cash on delivery"):"Sign in to checkout")+'</button>';
+ $("body").innerHTML=cart.map(function(c,i){var p=byId(c.id),im=p.images[0];return '<div class="line"><a class="t" href="#product-'+p.id+'" data-close>'+(im?'<img src="'+esc(cl(im,"c_fill,ar_2:3,w_160"))+'" alt="">':'')+'</a><div><a href="#product-'+p.id+'" data-close>'+esc(p.name)+'</a><small>'+optTxt(p,c)+'</small><div class="qty"><button data-q="'+i+'" data-d="-1" aria-label="Decrease">−</button><span>'+c.q+'</span><button data-q="'+i+'" data-d="1" aria-label="Increase">+</button></div> <button class="lnk" data-rm="'+i+'">Remove</button></div><div>'+rs(priceFor(p,c.s)*c.q)+'</div></div>'}).join("")+sumHTML(totals())+suggHTML("Add to your order")+'<button class="btn solid" id="toCo">'+(user?(S.upi_qr?"Checkout":"Checkout · Cash on delivery"):"Sign in to checkout")+'</button>';
 }
 function checkoutView(v){v=v||{};
  $("dTitle").textContent="Delivery details";
@@ -258,13 +284,13 @@ function checkoutView(v){v=v||{};
 function place(){
  if(!user){wantCo=true;return openAuth()}
  var v=function(i){return $(i).value.trim()},err=function(m){$("err").textContent=m};
- var cu={name:v("f_n"),phone:v("f_p"),address:v("f_a"),city:v("f_c"),state:v("f_s"),pincode:v("f_z"),payment:S.upi_qr?payM:"cod"};
+ var cu={name:v("f_n"),phone:v("f_p"),address:v("f_a"),city:v("f_c"),state:v("f_s"),pincode:v("f_z"),payment:S.upi_qr?payM:"cod",key:coKey||(coKey=newKey())};
  if(cu.name.length<2)return err("Please enter your name.");
  if(!/^[6-9]\d{9}$/.test(cu.phone))return err("Enter a valid 10-digit mobile number.");
  if(cu.address.length<8)return err("Please enter your full address.");
  if(!cu.city||!cu.state)return err("City and state are required.");
  if(!/^\d{6}$/.test(cu.pincode))return err("Enter a valid 6-digit pincode.");
- var lines=cart.map(function(c){return "• "+byId(c.id).name+(c.s?" ("+c.s+")":"")+" × "+c.q}).join("\n");
+ var lines=cart.map(function(c){return "• "+byId(c.id).name+(byId(c.id).color?" – "+byId(c.id).color:"")+(c.s?" ("+c.s+")":"")+" × "+c.q}).join("\n");
  $("place").disabled=true;$("place").textContent="Placing order…";
  db.rpc("place_order",{p_customer:cu,p_items:cart.map(function(c){return {id:c.id,size:c.s,qty:c.q}})}).then(function(r){
   if(r.error){$("place").disabled=false;$("place").textContent="Place order";return err(r.error.message)}
@@ -274,10 +300,10 @@ function place(){
   $("body").innerHTML='<div class="done"><div class="hint">Order '+esc(o.order_no)+'</div><h3>Thank you.</h3>'+(o.payment=="upi"?payBox(o.order_no,o.total):'<p class="hint">Please keep '+rs(o.total)+' ready in cash.</p>')+'<p class="hint" style="margin-top:10px">'+(S.whatsapp?' Tap below to confirm your order with us on WhatsApp.':' We will call you to confirm.')+'</p>'+(S.whatsapp?'<a class="btn solid auto" style="margin-top:18px" target="_blank" rel="noopener" href="https://wa.me/'+esc(S.whatsapp)+'?text='+encodeURIComponent(msg)+'">Confirm on WhatsApp</a>':'')+'<a class="btn auto" style="margin-top:12px" href="#account" data-close>Track your order</a></div>';
  });
 }
-function addToCart(id){var p=byId(id),s=picked[id]||p.sizes[0]||"",f=cart.filter(function(c){return c.id==id&&c.s==s})[0];if(f)f.q=Math.min(10,f.q+1);else cart.push({id:id,s:s,q:1});save()}
+function addToCart(id,once){var p=byId(id),s=picked[id]||p.sizes[0]||"",f=cart.filter(function(c){return c.id==id&&c.s==s})[0];if(f){if(!once)f.q=Math.min(10,f.q+1)}else cart.push({id:id,s:s,q:1});save()}
 function openBag(){closeMenu();$("drawer").classList.add("on");$("scrim").classList.add("on");cartView()}
 function closeMenu(){$("menu").classList.remove("on")}
-function shut(){$("drawer").classList.remove("on");$("menu").classList.remove("on");$("modal").classList.remove("on");$("scrim").classList.remove("on")}
+function shut(){$("drawer").classList.remove("on");$("menu").classList.remove("on");$("modal").classList.remove("on");$("scrim").classList.remove("on");$("mbody").innerHTML=""}
 function toCheckout(){if(!user){wantCo=true;return openAuth()}checkoutView()}
 
 /* ---------- sign in / account ---------- */
@@ -298,9 +324,9 @@ function afterLogin(){shut();if(wantCo){wantCo=false;openBag();checkoutView()}}
 function authGo(){
  var v=function(i){return $(i)?$(i).value.trim():""},m=function(t,ok){$("am").textContent=t;$("am").className="msg"+(ok?" ok":"")};
  var pw=$("a_p").value;
- if(mode=="reset"){if(pw.length<6)return m("Password must be at least 6 characters.");return db.auth.updateUser({password:pw}).then(function(r){if(r.error)return m(r.error.message);mode="in";setUser(r.data.user);shut()})}
+ if(mode=="reset"){if(pw.length<8)return m("Password must be at least 8 characters.");return db.auth.updateUser({password:pw}).then(function(r){if(r.error)return m(r.error.message);mode="in";setUser(r.data.user);shut()})}
  var em=v("a_e");if(!/^\S+@\S+\.\S+$/.test(em))return m("Enter a valid email address.");
- if(pw.length<6)return m("Password must be at least 6 characters.");
+ if(pw.length<8)return m("Password must be at least 8 characters.");
  $("aGo").disabled=true;
  if(mode=="up"){
   var nm=v("a_n");if(nm.length<2){$("aGo").disabled=false;return m("Please enter your name.")}
@@ -320,9 +346,9 @@ document.addEventListener("click",function(e){
  if(el=c("[data-f]")){var z=el.dataset.f,i=fsz.indexOf(z);i>-1?fsz.splice(i,1):fsz.push(z);keep(shop);return}
  if(c("[data-clear]")){fsz=[];keep(shop);return}
  if(el=c("[data-g]")){var id=location.hash.slice(9);gal[id]=+el.dataset.g;keep(function(){product(byId(id))});return}
- if(el=c("[data-p]")){picked[el.dataset.p]=el.dataset.s;keep(function(){product(byId(el.dataset.p))});return}
+ if(el=c("[data-p]")){picked[el.dataset.p]=el.dataset.s;lastSize=el.dataset.s;keep(function(){product(byId(el.dataset.p))});return}
  if(el=c("[data-add]")){addToCart(el.dataset.add);openBag();return}
- if(el=c("[data-buy]")){addToCart(el.dataset.buy);openBag();toCheckout();return}
+ if(el=c("[data-buy]")){addToCart(el.dataset.buy,true);openBag();toCheckout();return}
  if(el=c("[data-q]")){var ln=cart[el.dataset.q];ln.q=Math.min(10,ln.q+ +el.dataset.d);if(ln.q<1)cart.splice(el.dataset.q,1);save();cartView();return}
  if(el=c("[data-pay]")){var vv=formVals();payM=el.dataset.pay;checkoutView(vv);return}
  if(el=c("[data-utr]")){var no=el.dataset.utr,u=$("utr_"+no).value.trim(),um=$("um_"+no);if(!/^[A-Za-z0-9]{6,30}$/.test(u)){um.textContent="Enter the reference number from your UPI app.";return}
@@ -348,10 +374,10 @@ $("mnu").onclick=function(e){if(e.target.closest("a"))shut()};
 
 /* ---------- start ---------- */
 save();
-db.auth.onAuthStateChange(function(ev,s){setUser(s&&s.user);if(ev=="PASSWORD_RECOVERY"){mode="reset";openAuth()}});
+db.auth.onAuthStateChange(function(ev,s){setTimeout(function(){setUser(s&&s.user);if(ev=="PASSWORD_RECOVERY"){mode="reset";openAuth()}},0)});
 db.auth.getSession().then(function(r){setUser(r.data.session&&r.data.session.user)});
-Promise.all([db.from("products").select("*").eq("active",true).order("created_at",{ascending:false}),db.from("settings").select("*").eq("id",1).maybeSingle()]).then(function(r){
+Promise.all([db.from("products").select("id,name,category,price,sizes,description,details,images,video_url,active,created_at,compare_price,size_prices,badge,group_id,color,color_hex").eq("active",true).order("created_at",{ascending:false}),db.from("settings").select("*").eq("id",1).maybeSingle()]).then(function(r){
  if(r[0].error)throw r[0].error;P=r[0].data||[];if(r[1].data)S=r[1].data;
- cart=cart.filter(function(c){return byId(c.id)});save();ready=true;route();
+ cart=cart.filter(function(c){var p=byId(c.id);if(!p)return false;if(p.sizes.length&&p.sizes.indexOf(c.s)<0)c.s=p.sizes[0];if(!p.sizes.length)c.s="";c.q=Math.max(1,Math.min(10,c.q|0));return true});save();ready=true;route();
 }).catch(function(e){$("view").innerHTML='<div class="empty">Could not load the store. '+esc(e.message||"")+'</div>'});
 </script></body></html>
