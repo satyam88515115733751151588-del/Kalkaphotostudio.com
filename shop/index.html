@@ -255,7 +255,7 @@ function authGo(){
   var nm=v("a_n");if(nm.length<2){$("aGo").disabled=false;return m("Please enter your name.")}
   db.auth.signUp({email:em,password:pw,options:{data:{name:nm},emailRedirectTo:location.href.split("#")[0]}}).then(function(r){
    $("aGo").disabled=false;if(r.error)return m(r.error.message);
-   if(r.data.session){setUser(r.data.user);afterLogin()}else m("Account created. Check your email to confirm it, then sign in.",true)});
+   if(r.data.session){setUser(r.data.user);afterLogin()}else m("Account created! go the the sign in page",true)});
  }else{
   db.auth.signInWithPassword({email:em,password:pw}).then(function(r){
    $("aGo").disabled=false;if(r.error)return m(r.error.message);setUser(r.data.user);afterLogin()});
