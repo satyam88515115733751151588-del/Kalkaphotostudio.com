@@ -50,37 +50,9 @@
       max-width: 320px;
     }
 
-    /* FILTER TABS */
-    .filter-bar {
-      padding: 0 var(--px) 1.6rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    }
-
-    .filter-tab {
-      font-size: 0.58rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      padding: 0.4rem 0.9rem;
-      border-radius: 9999px;
-      cursor: none;
-      border: none;
-      background: transparent;
-      color: var(--on-surface-variant);
-      transition: background 0.3s, color 0.3s;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .filter-tab.active,
-    .filter-tab:hover {
-      background: var(--surface-container);
-      color: #000;
-    }
-
-    .filter-tab.active {
-      font-weight: 600;
+    /* FILTER TABS — liquid glass tab bar (styles live in styles.css: .glass-tabs) */
+    .gallery-filter {
+      margin-top: 1.4rem;
     }
 
     /* MASONRY */
@@ -332,12 +304,14 @@
       <div class="reveal reveal-delay-1">
         <p>A deliberate archive of moments where light and form meet intention. Each frame is a considered statement.
         </p>
-        <div class="filter-bar" style="padding:1.2rem 0 0; border:none;">
-          <button class="filter-tab active" data-filter="all">All</button>
-          <button class="filter-tab" data-filter="portraits">Portraits</button>
-          <button class="filter-tab" data-filter="landscapes">Landscapes</button>
-          <button class="filter-tab" data-filter="street">Street</button>
-          <button class="filter-tab" data-filter="fashion">Fashion</button>
+        <div class="gallery-filter">
+          <div class="glass-tabs" role="tablist" aria-label="Gallery categories" data-glass-lens=".filter-tab">
+            <button class="filter-tab glass-tab active" role="tab" data-filter="all">All</button>
+            <button class="filter-tab glass-tab" role="tab" data-filter="portraits">Portraits</button>
+            <button class="filter-tab glass-tab" role="tab" data-filter="landscapes">Landscapes</button>
+            <button class="filter-tab glass-tab" role="tab" data-filter="street">Street</button>
+            <button class="filter-tab glass-tab" role="tab" data-filter="fashion">Fashion</button>
+          </div>
         </div>
       </div>
     </header>
