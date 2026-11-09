@@ -25,7 +25,7 @@
 
   let W = 0, H = 0, dpr = 1, unit = 1, sc = 1, groundY = 0, groundH = 0;
   let skyGrad, houseCanvas;
-  let stars = [], bulbs = [], diyas = [], lanterns = [];
+  let stars = [], bulbs = [], lanterns = [];
   let rockets = [], particles = [], flashes = [];
   let drag = null, suppressClick = false;
   let t = 0, nextShot = 700, running = false, raf = 0, last = 0;
@@ -86,7 +86,7 @@
     h.scale(dpr, dpr);
     const rnd = mulberry(42);
     const R = (a, b) => a + rnd() * (b - a);
-    bulbs = []; diyas = [];
+    bulbs = [];
 
     // walk a polyline and drop bulbs at even spacing
     function addLine(pts, spacing, opt) {
@@ -244,13 +244,6 @@
     // ground strip
     h.fillStyle = '#05040c';
     h.fillRect(0, groundY, W, groundH + 2);
-    // diyas on the ground (bowls static, flames animated)
-    for (let dx = 12; dx < W; dx += R(24, 40) * unit) {
-      const dy = groundY + groundH * 0.55;
-      diyas.push({ x: dx, y: dy, p: rnd() * TAU });
-      h.fillStyle = '#7a3418';
-      h.beginPath(); h.ellipse(dx, dy, 4.5 * unit, 2.4 * unit, 0, 0, Math.PI); h.fill();
-    }
   }
 
   /* ---------- lanterns ---------- */
@@ -517,16 +510,6 @@
       ctx.drawImage(g, b.x - b.s / 2, b.y - b.s / 2, b.s, b.s);
       ctx.fillStyle = 'rgb(255,248,225)';
       ctx.beginPath(); ctx.arc(b.x, b.y, b.s * 0.1, 0, TAU); ctx.fill();
-    }
-    // diya flames
-    for (const d of diyas) {
-      const f = reduceMotion ? 0.9 : 0.8 + 0.2 * Math.sin(t * 9 + d.p) + (Math.random() - 0.5) * 0.08;
-      ctx.globalAlpha = 0.85 * f;
-      const s = 22 * unit;
-      ctx.drawImage(flameGlow, d.x - s / 2, d.y - 3 * unit - s / 2, s, s);
-      ctx.globalAlpha = f;
-      ctx.fillStyle = 'rgb(255,225,150)';
-      ctx.beginPath(); ctx.ellipse(d.x, d.y - 3.5 * unit, 1.4 * unit, 3 * unit, 0, 0, TAU); ctx.fill();
     }
     ctx.globalCompositeOperation = 'source-over';
 
